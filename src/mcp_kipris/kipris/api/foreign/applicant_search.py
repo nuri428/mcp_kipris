@@ -1,23 +1,28 @@
-from mcp_kipris.kipris.api.abs_class import ABSKiprisAPI
-from mcp_kipris.kipris.api.utils import get_nested_key_value
 import typing as t
-import pandas as pd
-from mcp_kipris.kipris.api.foreign.code import count_dict, sort_field_dict
 import urllib.parse
 from logging import getLogger
 
+import pandas as pd
+
+from mcp_kipris.kipris.api.abs_class import ABSKiprisAPI
+from mcp_kipris.kipris.api.utils import get_nested_key_value
+
 logger = getLogger("mcp-kipris")
+
 
 class ForeignPatentApplicantSearchAPI(ABSKiprisAPI):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.api_url = "http://plus.kipris.or.kr/openapi/rest/ForeignPatentAdvencedSearchService/applicantSearch"
 
-    def search(self, applicant:str,
-                current_page:int=1,
-                sort_field:str='AD',
-                sort_state:bool=True,
-                collection_values:str='US')->pd.DataFrame:
+    def search(
+        self,
+        applicant: str,
+        current_page: int = 1,
+        sort_field: str = "AD",
+        sort_state: bool = True,
+        collection_values: str = "US",
+    ) -> pd.DataFrame:
         """_summary_
 
         Args:
@@ -34,18 +39,17 @@ class ForeignPatentApplicantSearchAPI(ABSKiprisAPI):
             pd.DataFrame: _description_
         """
         logger.info(f"applicant: {applicant}")
-        if collection_values not in count_dict :
-            raise ValueError(f"collection_values must be in {count_dict.keys()}")
-        if sort_field not in sort_field_dict :
-            raise ValueError(f"sort_field must be in {sort_field_dict.keys()}")
+
         applicant = urllib.parse.quote(applicant)
-        response = self.common_call(api_url=self.api_url,
-                                  api_key_field="accessKey",
-                                  applicant=applicant,
-                                  current_page=str(current_page),
-                                  sort_field=str(sort_field),
-                                  sort_state="true" if sort_state else "false",
-                                  collection_values=str(collection_values))
+        response = self.common_call(
+            api_url=self.api_url,
+            api_key_field="accessKey",
+            applicant=applicant,
+            current_page=str(current_page),
+            sort_field=str(sort_field),
+            sort_state="true" if sort_state else "false",
+            collection_values=str(collection_values),
+        )
         patents = get_nested_key_value(response, "response.body.items.searchResult")
         if patents is None:
             logger.info("patents is None")

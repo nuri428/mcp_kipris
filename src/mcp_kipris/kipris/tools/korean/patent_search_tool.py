@@ -2,11 +2,12 @@ import logging
 import typing as t
 
 import pandas as pd
-from kipris.api.korean.patent_search_api import PatentSearchAPI
-from kipris.tools.abc import ToolHandler
 from pydantic import BaseModel, Field, ValidationError
 
-logger = logging.getLogger(__name__)
+from mcp_kipris.kipris.abc import ToolHandler
+from mcp_kipris.kipris.api.korean.patent_search_api import PatentSearchAPI
+
+logger = logging.getLogger("mcp-kipris")
 
 
 class PatentSearchArgs(BaseModel):

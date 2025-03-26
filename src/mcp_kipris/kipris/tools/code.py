@@ -1,4 +1,4 @@
-country = {
+country_dict = {
     "US": "미국",
     "EP": "유럽",
     "WO": "PCT",

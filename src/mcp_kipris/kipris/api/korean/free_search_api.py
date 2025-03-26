@@ -1,26 +1,32 @@
-from mcp_kipris.kipris.api.abs_class import ABSKiprisAPI
-from mcp_kipris.kipris.api.utils import get_nested_key_value
+import logging
 import typing as t
+import urllib.parse
+
 import pandas as pd
 
-import urllib.parse
-import logging
+from mcp_kipris.kipris.api.abs_class import ABSKiprisAPI
+from mcp_kipris.kipris.api.utils import get_nested_key_value
+
 logger = logging.getLogger("mcp-kipris")
+
 
 class PatentFreeSearchAPI(ABSKiprisAPI):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.api_url = "http://plus.kipris.or.kr/openapi/rest/patUtiModInfoSearchSevice/freeSearchInfo"
 
-    def search(self, word:str,
-                patent:bool=True,
-                utility:bool=True,
-                lastvalue:str="",
-                page_no:int=1,
-                num_of_rows:int=10,
-                desc_sort:bool=False,
-                sort_spec:str="AD",
-                **kwargs)->pd.DataFrame:
+    def search(
+        self,
+        word: str,
+        patent: bool = True,
+        utility: bool = True,
+        lastvalue: str = "",
+        page_no: int = 1,
+        num_of_rows: int = 10,
+        desc_sort: bool = False,
+        sort_spec: str = "AD",
+        **kwargs,
+    ) -> pd.DataFrame:
         """_summary_
 
         Args:
@@ -60,17 +66,19 @@ class PatentFreeSearchAPI(ABSKiprisAPI):
         # api url https://plus.kipris.or.kr/portal/data/service/DBII_000000000000001/view.do?menuNo=200100&kppBCode=&kppMCode=&kppSCode=&subTab=SC001&entYn=N&clasKeyword=#soap_ADI_0000000000002944
         word = urllib.parse.quote(word)
         logger.info(f"word: {word}")
-        response = self.common_call(api_url=self.api_url,
-                                  api_key_field="accessKey",
-                                  word=word,
-                                  patent="true" if patent else "false",
-                                  utility="true" if utility else "false",
-                                  page_no=str(page_no),
-                                  num_of_rows=str(num_of_rows),
-                                  lastvalue=str(lastvalue),
-                                  desc_sort="true" if desc_sort else "false",
-                                  sort_spec=str(sort_spec),
-                                  **kwargs)
+        response = self.common_call(
+            api_url=self.api_url,
+            api_key_field="accessKey",
+            word=word,
+            patent="true" if patent else "false",
+            utility="true" if utility else "false",
+            page_no=str(page_no),
+            num_of_rows=str(num_of_rows),
+            lastvalue=str(lastvalue),
+            desc_sort="true" if desc_sort else "false",
+            sort_spec=str(sort_spec),
+            **kwargs,
+        )
         patents = get_nested_key_value(response, "response.body.items.PatentUtilityInfo")
 
         logger.info(patents)
@@ -80,31 +88,47 @@ class PatentFreeSearchAPI(ABSKiprisAPI):
         if isinstance(patents, t.Dict):
             patents = [patents]
         patents = pd.DataFrame(patents)
-        patents = patents.drop_duplicates(subset=["application_number"])
-# <Applicant>주식회사 엘지에너지솔루션</Applicant>
-# <ApplicationDate>20250123</ApplicationDate>
-# <ApplicationNumber>1020250010491</ApplicationNumber>
-# <Abstract>본 출원은 음극 조성물, 리튬 이차 전지용 음극 및 음극을 포함하는 리튬 이차 전지에 관한 것이다.</Abstract>
-# <DrawingPath>http://plus.kipris.or.kr/kiprisplusws/fileToss.jsp?arg=6c650beb4cee9ce4122b704b88878c93369ec08af6388ff6f849fb8e24b833f76963670192e45f9a2d32d89c77a87fce4a9dda16fd43f2e9382520b3c4968d7ce804f2da60a06ff4</DrawingPath>
-# <ThumbnailPath>http://plus.kipris.or.kr/kiprisplusws/fileToss.jsp?arg=ed43a0609e94d6e22d01c5c32ba711cf14196bb3950514c0e5415023c0bad8ab1ad3578b336e1011c4fb1d1ef9fd058878070189afc2f9adc373fee834960addd3564b9fd05899c8</ThumbnailPath>
-# <SerialNumber>1</SerialNumber>
-# <InventionName>음극 조성물, 이를 포함하는 리튬 이차 전지용 음극 및 음극을 포함하는 리튬 이차 전지</InventionName>
-# <InternationalpatentclassificationNumber>H01M 4/62|H01M 4/38|H01M 4/134|H01M 10/0525|H01M 4/02</InternationalpatentclassificationNumber>
-# <OpeningDate>20250204</OpeningDate>
-# <OpeningNumber>1020250017736</OpeningNumber>
-# <PublicNumber/>
-# <PublicDate/>
-# <RegistrationDate/>
-# <RegistrationNumber/>
-# <RegistrationStatus>공개</RegistrationStatus>
-# ["Applicant","ApplicationDate","ApplicationNumber","Abstract","DrawingPath","ThumbnailPath","SerialNumber","InventionName","InternationalpatentclassificationNumber","OpeningDate","OpeningNumber","PublicNumber","PublicDate","RegistrationDate","RegistrationNumber","RegistrationStatus"]
-        patents = patents[["Applicant","ApplicationDate","ApplicationNumber","Abstract","InventionName","InternationalpatentclassificationNumber","RegistrationStatus"]]
-        patents = patents.rename(columns={"InventionName":"발명의 제목",
-                                          "ApplicationNumber":"출원번호",
-                                          "Abstract":"발명의 개요",
-                                          "InternationalpatentclassificationNumber":"IPC번호",
-                                          "ApplicationDate":"출원일",
-                                          "RegistrationStatus":"등록상태",
-                                          "Applicant":"출원인",
-                                          })
+        if "application_number" in patents.columns:
+            patents = patents.drop_duplicates(subset=["application_number"])
+        if "ApplicationNumber" in patents.columns:
+            patents = patents.drop_duplicates(subset=["ApplicationNumber"])
+        # <Applicant>주식회사 엘지에너지솔루션</Applicant>
+        # <ApplicationDate>20250123</ApplicationDate>
+        # <ApplicationNumber>1020250010491</ApplicationNumber>
+        # <Abstract>본 출원은 음극 조성물, 리튬 이차 전지용 음극 및 음극을 포함하는 리튬 이차 전지에 관한 것이다.</Abstract>
+        # <DrawingPath>http://plus.kipris.or.kr/kiprisplusws/fileToss.jsp?arg=6c650beb4cee9ce4122b704b88878c93369ec08af6388ff6f849fb8e24b833f76963670192e45f9a2d32d89c77a87fce4a9dda16fd43f2e9382520b3c4968d7ce804f2da60a06ff4</DrawingPath>
+        # <ThumbnailPath>http://plus.kipris.or.kr/kiprisplusws/fileToss.jsp?arg=ed43a0609e94d6e22d01c5c32ba711cf14196bb3950514c0e5415023c0bad8ab1ad3578b336e1011c4fb1d1ef9fd058878070189afc2f9adc373fee834960addd3564b9fd05899c8</ThumbnailPath>
+        # <SerialNumber>1</SerialNumber>
+        # <InventionName>음극 조성물, 이를 포함하는 리튬 이차 전지용 음극 및 음극을 포함하는 리튬 이차 전지</InventionName>
+        # <InternationalpatentclassificationNumber>H01M 4/62|H01M 4/38|H01M 4/134|H01M 10/0525|H01M 4/02</InternationalpatentclassificationNumber>
+        # <OpeningDate>20250204</OpeningDate>
+        # <OpeningNumber>1020250017736</OpeningNumber>
+        # <PublicNumber/>
+        # <PublicDate/>
+        # <RegistrationDate/>
+        # <RegistrationNumber/>
+        # <RegistrationStatus>공개</RegistrationStatus>
+        # ["Applicant","ApplicationDate","ApplicationNumber","Abstract","DrawingPath","ThumbnailPath","SerialNumber","InventionName","InternationalpatentclassificationNumber","OpeningDate","OpeningNumber","PublicNumber","PublicDate","RegistrationDate","RegistrationNumber","RegistrationStatus"]
+        patents = patents[
+            [
+                "Applicant",
+                "ApplicationDate",
+                "ApplicationNumber",
+                "Abstract",
+                "InventionName",
+                "InternationalpatentclassificationNumber",
+                "RegistrationStatus",
+            ]
+        ]
+        patents = patents.rename(
+            columns={
+                "InventionName": "발명의 제목",
+                "ApplicationNumber": "출원번호",
+                "Abstract": "발명의 개요",
+                "InternationalpatentclassificationNumber": "IPC번호",
+                "ApplicationDate": "출원일",
+                "RegistrationStatus": "등록상태",
+                "Applicant": "출원인",
+            }
+        )
         return patents

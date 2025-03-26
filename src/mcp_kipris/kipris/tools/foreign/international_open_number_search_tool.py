@@ -1,14 +1,15 @@
+import logging
 import typing as t
-from logging import getLogger
 
 import pandas as pd
-from kipris.tools.abc import ToolHandler
+from mcp.types import Tool
 from pydantic import BaseModel, Field, ValidationError, field_validator
 
-from mcp_kipris.kipris.api.foreign import ForeignPatentInternationalOpenNumberSearchAPI
-from mcp_kipris.kipris.api.foreign.code import country, sort_field_dict
+from mcp_kipris.kipris.abc import ToolHandler
+from mcp_kipris.kipris.api.foreign.international_open_number_search import ForeignPatentInternationalOpenNumberSearchAPI
+from mcp_kipris.kipris.tools.code import country_dict, sort_field_dict
 
-logger = getLogger("mcp-kipris")
+logger = logging.getLogger("mcp-kipris")
 
 
 class ForeignPatentInternationalOpenNumberSearchArgs(BaseModel):
@@ -24,8 +25,8 @@ class ForeignPatentInternationalOpenNumberSearchArgs(BaseModel):
     @field_validator("collection_values")
     @classmethod
     def validate_collection_values(cls, v: str) -> str:
-        if v not in country:
-            raise ValueError(f"collection_values must be one of: {', '.join(country.keys())}")
+        if v not in country_dict:
+            raise ValueError(f"collection_values must be one of: {', '.join(country_dict.keys())}")
         return v
 
     @field_validator("sort_field")
@@ -41,6 +42,50 @@ class ForeignPatentInternationalOpenNumberSearchTool(ToolHandler):
     description: str = "foreign patent search by international open number, this tool is for foreign(US, EP, WO, JP, PJ, CP, CN, TW, RU, CO, SE, ES, IL) patent search"
     api: ForeignPatentInternationalOpenNumberSearchAPI = ForeignPatentInternationalOpenNumberSearchAPI()
     args_schema: t.Type[BaseModel] = ForeignPatentInternationalOpenNumberSearchArgs
+
+    def get_tool_description(self) -> Tool:
+        return Tool(
+            name=self.name,
+            description=self.description,
+            input_schema={
+                "type": "object",
+                "properties": {
+                    "international_open_number": {"type": "string", "description": "국제공개번호"},
+                    "current_page": {"type": "integer", "description": "현재 페이지 번호 (기본값: 1)"},
+                    "sort_field": {
+                        "type": "string",
+                        "description": "정렬 기준 필드",
+                        "enum": list(sort_field_dict.keys()),
+                        "default": "AD",
+                    },
+                    "sort_state": {"type": "boolean", "description": "정렬 상태 (기본값: true)"},
+                    "collection_values": {
+                        "type": "string",
+                        "description": "검색 대상 국가",
+                        "enum": list(country_dict.keys()),
+                        "default": "US",
+                    },
+                },
+                "required": ["international_open_number"],
+            },
+            output_schema={
+                "type": "object",
+                "description": "pandas DataFrame 형태의 검색 결과",
+                "properties": {
+                    "출원번호": {"type": "string"},
+                    "출원일자": {"type": "string", "format": "date"},
+                    "발명의명칭": {"type": "string"},
+                    "출원인": {"type": "string"},
+                    "최근상태": {"type": "string"},
+                    "등록번호": {"type": "string"},
+                    "등록일자": {"type": "string", "format": "date"},
+                    "공개번호": {"type": "string"},
+                    "공개일자": {"type": "string", "format": "date"},
+                    "공고번호": {"type": "string"},
+                    "공고일자": {"type": "string", "format": "date"},
+                },
+            },
+        )
 
     def run_tool(self, args: dict) -> pd.DataFrame:
         try:
@@ -64,10 +109,10 @@ class ForeignPatentInternationalOpenNumberSearchTool(ToolHandler):
                     raise ValueError("Invalid input: 국제공개번호(international_open_number) 정보가 필요합니다.")
                 elif field == "collection_values":
                     raise ValueError(
-                        f"Invalid input: 국가 코드(collection_values)는 다음 중 하나여야 합니다: {', '.join(country.keys())}"
+                        f"Invalid input: 국가 코드(collection_values)는 다음 중 하나여야 합니다: {', '.join(self.api.country.keys())}"
                     )
                 elif field == "sort_field":
                     raise ValueError(
-                        f"Invalid input: 정렬 기준(sort_field)은 다음 중 하나여야 합니다: {', '.join(sort_field_dict.keys())}"
+                        f"Invalid input: 정렬 기준(sort_field)은 다음 중 하나여야 합니다: {', '.join(self.api.sort_field_dict.keys())}"
                     )
             raise ValueError("Invalid input: 입력값이 올바르지 않습니다.")
