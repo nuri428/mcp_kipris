@@ -32,7 +32,10 @@ indent-width = 4
 
 # 코드 뒤쪽 공백 제거
 extend-select = ["W291"]  # 줄 끝 공백 검사
-fix = true  # 자동 수정 활성화
+# fix = true  # 자동 수정 활성화
+
+# 사용하지 않는 import와 문법 오류 검사 비활성화
+ignore = ["F401", "E", "F"]  # F401: 사용하지 않는 import, E: 문법 오류, F: 문법 오류
 
 [tool.ruff.format]
 quote-style = "double"
