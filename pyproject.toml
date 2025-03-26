@@ -1,0 +1,46 @@
+[build-system]
+requires = ["setuptools>=45", "setuptools_scm[toml]>=6.2"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "mcp-kipris"
+dynamic = ["version"]
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "icecream>=2.1.4",
+    "mcp[cli]>=1.5.0",
+    "pandas>=2.2.3",
+    "python-dotenv>=1.1.0",
+    "requests>=2.32.3",
+    "stringcase>=1.2.0",
+    "xmltodict>=0.14.2",
+]
+scripts = { mcp-kipris = "mcp_kipris:main" }
+
+[dependency-groups]
+dev = [
+    "pyright>=1.1.398",
+    "ruff>=0.3.0",
+]
+
+[tool.ruff]
+# 코드 포맷팅 관련 규칙
+line-length = 120
+indent-width = 4
+
+# 코드 뒤쪽 공백 제거
+extend-select = ["W291"]  # 줄 끝 공백 검사
+fix = true  # 자동 수정 활성화
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+skip-magic-trailing-comma = false
+line-ending = "auto"
+docstring-code-format = true
+docstring-code-line-length = 120
+
+[tool.setuptools_scm]
+write_to = "src/mcp_kipris/_version.py"
