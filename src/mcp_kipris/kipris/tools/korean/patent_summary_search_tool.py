@@ -1,8 +1,9 @@
 import logging
 import typing as t
+from collections.abc import Sequence
 
 import pandas as pd
-from mcp.types import Tool
+from mcp.types import EmbeddedResource, ImageContent, TextContent, Tool
 from pydantic import BaseModel, Field, ValidationError
 
 from mcp_kipris.kipris.abc import ToolHandler
@@ -16,16 +17,17 @@ class PatentSummarySearchArgs(BaseModel):
 
 
 class PatentSummarySearchTool(ToolHandler):
-    name: str = "patent_summary_search"
-    description: str = "patent summary search by application number, this tool is for korean patent search"
-    api: PatentSummarySearchAPI = PatentSummarySearchAPI()
-    args_schema: t.Type[BaseModel] = PatentSummarySearchArgs
+    def __init__(self):
+        super().__init__("patent_summary_search")
+        self.api = PatentSummarySearchAPI()
+        self.description = "patent summary search by application number, this tool is for korean patent search"
+        self.args_schema = PatentSummarySearchArgs
 
     def get_tool_description(self) -> Tool:
         return Tool(
             name=self.name,
             description=self.description,
-            input_schema={
+            inputSchema={
                 "type": "object",
                 "properties": {"application_number": {"type": "string", "description": "출원번호"}},
                 "required": ["application_number"],
@@ -45,12 +47,13 @@ class PatentSummarySearchTool(ToolHandler):
             },
         )
 
-    def run_tool(self, args: dict) -> pd.DataFrame:
+    def run_tool(self, args: dict) -> Sequence[TextContent | ImageContent | EmbeddedResource]:
         try:
             validated_args = PatentSummarySearchArgs(**args)
             logger.info(f"application_number: {validated_args.application_number}")
 
-            result = self.api.search(application_number=validated_args.application_number)
+            response = self.api.search(application_number=validated_args.application_number)
+            result = [TextContent(type="text", text=response.to_json(orient="records", indent=2, force_ascii=False))]
             return result
         except ValidationError as e:
             logger.error(f"Validation error: {str(e)}")

@@ -1,8 +1,9 @@
 import logging
 import typing as t
+from collections.abc import Sequence
 
 import pandas as pd
-from mcp.types import Tool
+from mcp.types import EmbeddedResource, ImageContent, TextContent, Tool
 from pydantic import BaseModel, Field, ValidationError, field_validator
 
 from mcp_kipris.kipris.abc import ToolHandler
@@ -38,16 +39,17 @@ class ForeignPatentInternationalOpenNumberSearchArgs(BaseModel):
 
 
 class ForeignPatentInternationalOpenNumberSearchTool(ToolHandler):
-    name: str = "foreign_patent_international_open_number_search"
-    description: str = "foreign patent search by international open number, this tool is for foreign(US, EP, WO, JP, PJ, CP, CN, TW, RU, CO, SE, ES, IL) patent search"
-    api: ForeignPatentInternationalOpenNumberSearchAPI = ForeignPatentInternationalOpenNumberSearchAPI()
-    args_schema: t.Type[BaseModel] = ForeignPatentInternationalOpenNumberSearchArgs
+    def __init__(self):
+        super().__init__("foreign_patent_international_open_number_search")
+        self.api = ForeignPatentInternationalOpenNumberSearchAPI()
+        self.description = "foreign patent search by international open number, this tool is for foreign(US, EP, WO, JP, PJ, CP, CN, TW, RU, CO, SE, ES, IL) patent search"
+        self.args_schema = ForeignPatentInternationalOpenNumberSearchArgs
 
     def get_tool_description(self) -> Tool:
         return Tool(
             name=self.name,
             description=self.description,
-            input_schema={
+            inputSchema={
                 "type": "object",
                 "properties": {
                     "international_open_number": {"type": "string", "description": "국제공개번호"},
@@ -87,18 +89,19 @@ class ForeignPatentInternationalOpenNumberSearchTool(ToolHandler):
             },
         )
 
-    def run_tool(self, args: dict) -> pd.DataFrame:
+    def run_tool(self, args: dict) -> Sequence[TextContent | ImageContent | EmbeddedResource]:
         try:
             validated_args = ForeignPatentInternationalOpenNumberSearchArgs(**args)
             logger.info(f"international_open_number: {validated_args.international_open_number}")
 
-            result = self.api.search(
+            response = self.api.search(
                 international_open_number=validated_args.international_open_number,
                 current_page=validated_args.current_page,
                 sort_field=validated_args.sort_field,
                 sort_state=validated_args.sort_state,
                 collection_values=validated_args.collection_values,
             )
+            result = [TextContent(type="text", text=response.to_json(orient="records", indent=2, force_ascii=False))]
             return result
         except ValidationError as e:
             logger.error(f"Validation error: {str(e)}")

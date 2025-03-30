@@ -1,8 +1,9 @@
 import logging
 import typing as t
+from collections.abc import Sequence
 
 import pandas as pd
-from mcp.types import Tool
+from mcp.types import EmbeddedResource, ImageContent, TextContent, Tool
 from pydantic import BaseModel, Field, ValidationError
 
 from mcp_kipris.kipris.abc import ToolHandler
@@ -16,48 +17,32 @@ class PatentDetailSearchArgs(BaseModel):
 
 
 class PatentDetailSearchTool(ToolHandler):
-    name: str = "patent_detail_search"
-    description: str = "patent detail search by application number, this tool is for korean patent search"
-    api: PatentDetailSearchAPI = PatentDetailSearchAPI()
-    args_schema: t.Type[BaseModel] = PatentDetailSearchArgs
+    def __init__(self):
+        super().__init__("patent_detail_search")
+        self.api = PatentDetailSearchAPI()
+        self.description = "patent detail search by application number, this tool is for korean patent search"
+        self.args_schema = PatentDetailSearchArgs
 
     def get_tool_description(self) -> Tool:
         return Tool(
             name=self.name,
             description=self.description,
-            input_schema={
+            inputSchema={
                 "type": "object",
                 "properties": {"application_number": {"type": "string", "description": "출원번호"}},
                 "required": ["application_number"],
             },
-            output_schema={
-                "type": "object",
-                "description": "pandas DataFrame 형태의 특허 상세 정보",
-                "properties": {
-                    "출원번호": {"type": "string"},
-                    "출원일자": {"type": "string", "format": "date"},
-                    "발명의명칭": {"type": "string"},
-                    "출원인": {"type": "string"},
-                    "발명자": {"type": "string"},
-                    "IPC분류": {"type": "string"},
-                    "요약": {"type": "string"},
-                    "청구항": {"type": "string"},
-                    "대표도면": {"type": "string", "format": "uri"},
-                    "등록상태": {"type": "string"},
-                    "등록번호": {"type": "string"},
-                    "등록일자": {"type": "string", "format": "date"},
-                },
-            },
         )
 
-    def run_tool(self, args: dict) -> pd.DataFrame:
+    def run_tool(self, args: dict) -> Sequence[TextContent | ImageContent | EmbeddedResource]:
         try:
             validated_args = PatentDetailSearchArgs(**args)
             logger.info(f"application_number: {validated_args.application_number}")
 
-            result = self.api.search(
+            response = self.api.search(
                 application_number=validated_args.application_number,
             )
+            result = [TextContent(type="text", text=response.to_json(orient="records", indent=2, force_ascii=False))]
             return result
         except ValidationError as e:
             logger.error(f"Validation error: {str(e)}")

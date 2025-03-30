@@ -1,7 +1,9 @@
 import logging
 import typing as t
+from collections.abc import Sequence
 
 import pandas as pd
+from mcp.types import EmbeddedResource, ImageContent, TextContent, Tool
 from pydantic import BaseModel, Field, ValidationError
 
 from mcp_kipris.kipris.abc import ToolHandler
@@ -49,26 +51,43 @@ class PatentSearchArgs(BaseModel):
 
 
 class PatentSearchTool(ToolHandler):
-    name: str = "korean_patent_search"
-    description: str = "patent search many fields, this tool is for korean patent search"
-    api: PatentSearchAPI = PatentSearchAPI()
-    args_schema: t.Type[BaseModel] = PatentSearchArgs
+    def __init__(self):
+        super().__init__("korean_patent_search")
+        self.api = PatentSearchAPI()
+        self.description = "patent search many fields, this tool is for korean patent search"
+        self.args_schema = PatentSearchArgs
 
-    def run_tool(self, args: dict) -> pd.DataFrame:
+    def get_tool_description(self) -> Tool:
+        return Tool(
+            name=self.name,
+            description=self.description,
+            inputSchema={
+                "type": "object",
+                "properties": {
+                    "word": {
+                        "type": "string",
+                        "description": "Search query, default is an empty string. this field can be empty",
+                    },
+                },
+            },
+        )
+
+    def run_tool(self, args: dict) -> Sequence[TextContent | ImageContent | EmbeddedResource]:
         try:
             validated_args = PatentSearchArgs(**args)
             logger.info(f"search_word: {validated_args.word}")
 
-            result = self.api.search(
+            response = self.api.search(
                 search_word=validated_args.word,
                 patent=validated_args.patent,
                 utility=validated_args.utility,
                 lastvalue=validated_args.lastvalue,
-                docs_start=validated_args.docs_start,
-                docs_count=validated_args.docs_count,
+                page_no=validated_args.page_no,
+                num_of_rows=validated_args.num_of_rows,
                 sort_spec=validated_args.sort_spec,
                 desc_sort=validated_args.desc_sort,
             )
+            result = [TextContent(type="text", text=response.to_json(orient="records", indent=2, force_ascii=False))]
             return result
         except ValidationError as e:
             logger.error(f"Validation error: {str(e)}")

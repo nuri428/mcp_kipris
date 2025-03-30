@@ -1,8 +1,9 @@
 import logging
 import typing as t
+from collections.abc import Sequence
 
 import pandas as pd
-from mcp.types import Tool
+from mcp.types import EmbeddedResource, ImageContent, TextContent, Tool
 from pydantic import BaseModel, Field, ValidationError, field_validator
 
 from mcp_kipris.kipris.abc import ToolHandler
@@ -38,16 +39,17 @@ class ForeignPatentApplicantSearchArgs(BaseModel):
 
 
 class ForeignPatentApplicantSearchTool(ToolHandler):
-    name: str = "foreign_patent_applicant_search"
-    description: str = "foreign patent search by applicant, this tool is for foreign(US, EP, WO, JP, PJ, CP, CN, TW, RU, CO, SE, ES, IL) patent search"
-    api: ForeignPatentApplicantSearchAPI = ForeignPatentApplicantSearchAPI()
-    args_schema: t.Type[BaseModel] = ForeignPatentApplicantSearchArgs
+    def __init__(self):
+        sum
+        self.api = ForeignPatentApplicantSearchAPI()
+        self.description = "foreign patent search by applicant, this tool is for foreign(US, EP, WO, JP, PJ, CP, CN, TW, RU, CO, SE, ES, IL) patent search"
+        self.args_schema = ForeignPatentApplicantSearchArgs
 
     def get_tool_description(self) -> Tool:
         return Tool(
             name=self.name,
             description=self.description,
-            input_schema={
+            inputSchema={
                 "type": "object",
                 "properties": {
                     "applicant": {"type": "string", "description": "출원인명"},
@@ -87,18 +89,19 @@ class ForeignPatentApplicantSearchTool(ToolHandler):
             },
         )
 
-    def run_tool(self, args: dict) -> pd.DataFrame:
+    def run_tool(self, args: dict) -> Sequence[TextContent | ImageContent | EmbeddedResource]:
         try:
             validated_args = ForeignPatentApplicantSearchArgs(**args)
             logger.info(f"applicant: {validated_args.applicant}")
 
-            result = self.api.search(
+            response = self.api.search(
                 applicant=validated_args.applicant,
                 current_page=validated_args.current_page,
                 sort_field=validated_args.sort_field,
                 sort_state=validated_args.sort_state,
                 collection_values=validated_args.collection_values,
             )
+            result = [TextContent(type="text", text=response.to_json(orient="records", indent=2, force_ascii=False))]
             return result
         except ValidationError as e:
             logger.error(f"Validation error: {str(e)}")

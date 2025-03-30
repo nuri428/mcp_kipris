@@ -1,8 +1,9 @@
 import logging
 import typing as t
+from collections.abc import Sequence
 
 import pandas as pd
-from mcp.types import Tool
+from mcp.types import EmbeddedResource, ImageContent, TextContent, Tool
 from pydantic import BaseModel, Field, ValidationError
 
 from mcp_kipris.kipris.abc import ToolHandler
@@ -20,16 +21,17 @@ class PatentRighterSearchArgs(BaseModel):
 
 
 class PatentRighterSearchTool(ToolHandler):
-    name: str = "patent_righter_search"
-    description: str = "patent search by righter name, this tool is for korean patent search"
-    api: PatentRighterSearchAPI = PatentRighterSearchAPI()
-    args_schema: t.Type[BaseModel] = PatentRighterSearchArgs
+    def __init__(self):
+        super().__init__("patent_righter_search")
+        self.api = PatentRighterSearchAPI()
+        self.description = "patent search by righter name, this tool is for korean patent search"
+        self.args_schema = PatentRighterSearchArgs
 
     def get_tool_description(self) -> Tool:
         return Tool(
             name=self.name,
             description=self.description,
-            input_schema={
+            inputSchema={
                 "type": "object",
                 "properties": {
                     "righter_name": {"type": "string", "description": "권리자명"},
@@ -64,18 +66,19 @@ class PatentRighterSearchTool(ToolHandler):
             },
         )
 
-    def run_tool(self, args: dict) -> pd.DataFrame:
+    def run_tool(self, args: dict) -> Sequence[TextContent | ImageContent | EmbeddedResource]:
         try:
             validated_args = PatentRighterSearchArgs(**args)
             logger.info(f"righter_name: {validated_args.righter_name}")
 
-            result = self.api.search(
+            response = self.api.search(
                 righter_name=validated_args.righter_name,
                 docs_start=validated_args.docs_start,
                 docs_count=validated_args.docs_count,
                 desc_sort=validated_args.desc_sort,
                 sort_spec=validated_args.sort_spec,
             )
+            result = [TextContent(type="text", text=response.to_json(orient="records", indent=2, force_ascii=False))]
             return result
         except ValidationError as e:
             logger.error(f"Validation error: {str(e)}")
