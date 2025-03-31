@@ -1,11 +1,13 @@
-import typing as t
 import datetime
+import json
+import traceback
+import typing as t
+from logging import getLogger
+from xml.parsers.expat import ExpatError
+
 import requests
 import xmltodict
-import traceback
-from xml.parsers.expat import ExpatError
-import json
-from logging import getLogger
+
 logger = getLogger("mcp-kipris")
 
 
@@ -43,6 +45,7 @@ def get_nested_key_value(dictionary: t.Dict, nested_key: str, sep: str = ".", de
         logger.error(e)
         return default_value
 
+
 def get_response(url: str) -> t.Dict:
     """_summary_
         url을 입력 받아서 해당 url에 대한 get 요청을 보내고, 결과를 json으로 반환함.
@@ -56,22 +59,31 @@ def get_response(url: str) -> t.Dict:
     try:
         key_str = datetime.datetime.strftime(datetime.datetime.now(), "%H:%M:%S")
 
+        # 타임아웃 설정 (연결 시도: 60초, 응답 대기: 600초)
+        # 총 타임아웃: 10분 (MCP 서버 타임아웃보다 길게 설정)
+        logger.info(f"HTTP 요청 시작: {url}")
+        start_time = datetime.datetime.now()
+
         response_text = ""
         with requests.Session() as sess:
-            response = sess.get(url, timeout=300)
+            response = sess.get(url, timeout=(60, 600))
             response_text = response.text
+
+        end_time = datetime.datetime.now()
+        elapsed_time = (end_time - start_time).total_seconds()
+        logger.info(f"HTTP 요청 완료: {elapsed_time:.2f}초 소요")
+
         try:
             dict_type = xmltodict.parse(response_text)
         except ExpatError:
             raise Exception("response is not xml check query url [%s] response [%s]", url, response_text[0:100])
         json_data = json.loads(json.dumps(dict_type))
         result_header = get_nested_key_value(json_data, "response.header", default_value="")
-        logger.info("__kipris__:[%s]:[%s] :result header : [%s]",
-                            key_str, url[24:], result_header)
+        logger.info("__kipris__:[%s]:[%s] :result header : [%s]", key_str, url[24:], result_header)
         return json_data
 
     except requests.exceptions.Timeout as e:
-        logger.error("timeout:[%s]", e)
+        logger.error(f"타임아웃 발생 (60초 연결 시도, 600초 응답 대기): {str(e)}")
         return {}
     except requests.exceptions.ConnectionError as e:
         logger.error("connectoin Error:[%s]", e)
