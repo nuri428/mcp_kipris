@@ -1,3 +1,4 @@
+import datetime
 import logging
 import os
 import sys
@@ -86,9 +87,25 @@ async def call_tool(tool_name: str, args: dict) -> Sequence[TextContent | ImageC
         raise ValueError(f"Unknown tool: {tool_name}")
 
     try:
-        return tool_handler.run_tool(args)
+        # 비동기 메서드(run_tool_async)를 사용하여 타임아웃 및 응답 시간 개선
+        logger.info(f"비동기 실행 시작: {tool_name}")
+        start_time = datetime.datetime.now()
+
+        try:
+            # 먼저 비동기 메서드 시도
+            result = await tool_handler.run_tool_async(args)
+        except (AttributeError, NotImplementedError) as e:
+            # 비동기 메서드가 없거나 구현되지 않은 경우 동기 메서드로 폴백
+            logger.warning(f"비동기 메서드 실패, 동기 메서드로 폴백: {str(e)}")
+            result = tool_handler.run_tool(args)
+
+        end_time = datetime.datetime.now()
+        elapsed_time = (end_time - start_time).total_seconds()
+        logger.info(f"도구 실행 완료: {tool_name}, 소요시간: {elapsed_time:.2f}초")
+
+        return result
     except Exception as e:
-        logger.error(str(e))
+        logger.error(f"도구 실행 중 오류 발생: {str(e)}")
         raise RuntimeError(f"Caught Exception. Error: {str(e)}")
 
 
