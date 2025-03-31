@@ -1,4 +1,5 @@
 import logging
+import os
 import typing as t
 from collections.abc import Sequence
 
@@ -13,6 +14,10 @@ from mcp_kipris.kipris.api.foreign.international_application_number_search impor
 from mcp_kipris.kipris.tools.code import country_dict, sort_field_dict
 
 logger = logging.getLogger("mcp-kipris")
+api_key = os.getenv("KIPRIS_API_KEY")
+
+if not api_key:
+    raise ValueError("KIPRIS_API_KEY environment variable required.")
 
 
 class ForeignPatentInternationalApplicationNumberSearchArgs(BaseModel):
@@ -45,7 +50,7 @@ class ForeignPatentInternationalApplicationNumberSearchArgs(BaseModel):
 class ForeignPatentInternationalApplicationNumberSearchTool(ToolHandler):
     def __init__(self):
         super().__init__("foreign_patent_international_application_number_search")
-        self.api = ForeignPatentInternationalApplicationNumberSearchAPI()
+        self.api = ForeignPatentInternationalApplicationNumberSearchAPI(api_key=api_key)
         self.description = "foreign patent search by international application number, this tool is for foreign(US, EP, WO, JP, PJ, CP, CN, TW, RU, CO, SE, ES, IL) patent search"
         self.args_schema = ForeignPatentInternationalApplicationNumberSearchArgs
 

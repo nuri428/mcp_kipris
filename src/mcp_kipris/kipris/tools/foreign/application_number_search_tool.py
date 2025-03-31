@@ -1,4 +1,5 @@
 import logging
+import os
 import typing as t
 from collections.abc import Sequence
 
@@ -11,6 +12,10 @@ from mcp_kipris.kipris.api.foreign.application_number_search import ForeignPaten
 from mcp_kipris.kipris.tools.code import country_dict, sort_field_dict
 
 logger = logging.getLogger("mcp-kipris")
+api_key = os.getenv("KIPRIS_API_KEY")
+
+if not api_key:
+    raise ValueError("KIPRIS_API_KEY environment variable required.")
 
 
 class ForeignPatentApplicationNumberSearchArgs(BaseModel):
@@ -41,7 +46,7 @@ class ForeignPatentApplicationNumberSearchArgs(BaseModel):
 class ForeignPatentApplicationNumberSearchTool(ToolHandler):
     def __init__(self):
         super().__init__("foreign_patent_application_number_search")
-        self.api = ForeignPatentApplicationNumberSearchAPI()
+        self.api = ForeignPatentApplicationNumberSearchAPI(api_key=api_key)
         self.description = "foreign patent search by application number, this tool is for foreign(US, EP, WO, JP, PJ, CP, CN, TW, RU, CO, SE, ES, IL) patent search"
         self.args_schema = ForeignPatentApplicationNumberSearchArgs
 
@@ -57,14 +62,14 @@ class ForeignPatentApplicationNumberSearchTool(ToolHandler):
                     "sort_field": {
                         "type": "string",
                         "description": "정렬 기준 필드",
-                        "enum": list(self.api.sort_field_dict.keys()),
+                        "enum": list(sort_field_dict.keys()),
                         "default": "AD",
                     },
                     "sort_state": {"type": "boolean", "description": "정렬 상태 (기본값: true)"},
                     "collection_values": {
                         "type": "string",
                         "description": "검색 대상 국가",
-                        "enum": list(self.api.country.keys()),
+                        "enum": list(country_dict.keys()),
                         "default": "US",
                     },
                 },
@@ -112,10 +117,10 @@ class ForeignPatentApplicationNumberSearchTool(ToolHandler):
                     raise ValueError("Invalid input: 출원번호(application_number) 정보가 필요합니다.")
                 elif field == "collection_values":
                     raise ValueError(
-                        f"Invalid input: 국가 코드(collection_values)는 다음 중 하나여야 합니다: {', '.join(self.api.country.keys())}"
+                        f"Invalid input: 국가 코드(collection_values)는 다음 중 하나여야 합니다: {', '.join(country_dict.keys())}"
                     )
                 elif field == "sort_field":
                     raise ValueError(
-                        f"Invalid input: 정렬 기준(sort_field)은 다음 중 하나여야 합니다: {', '.join(self.api.sort_field_dict.keys())}"
+                        f"Invalid input: 정렬 기준(sort_field)은 다음 중 하나여야 합니다: {', '.join(sort_field_dict.keys())}"
                     )
             raise ValueError("Invalid input: 입력값이 올바르지 않습니다.")

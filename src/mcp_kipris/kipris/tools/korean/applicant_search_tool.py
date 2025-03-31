@@ -1,4 +1,6 @@
+import asyncio
 import logging
+import os
 import typing as t
 from collections.abc import Sequence
 
@@ -10,6 +12,10 @@ from mcp_kipris.kipris.abc import ToolHandler
 from mcp_kipris.kipris.api.korean.applicant_search_api import PatentApplicantSearchAPI
 
 logger = logging.getLogger("mcp-kipris")
+api_key = os.getenv("KIPRIS_API_KEY")
+
+if not api_key:
+    raise ValueError("KIPRIS_API_KEY environment variable required.")
 
 
 class PatentApplicantSearchArgs(BaseModel):
@@ -34,7 +40,7 @@ class PatentApplicantSearchArgs(BaseModel):
 class PatentApplicantSearchTool(ToolHandler):
     def __init__(self):
         super().__init__("patent_applicant_search")
-        self.api = PatentApplicantSearchAPI()
+        self.api = PatentApplicantSearchAPI(api_key=api_key)
         self.description = "patent search by applicant name, this tool is for korean patent search"
 
     def get_tool_description(self) -> Tool:
@@ -72,11 +78,11 @@ class PatentApplicantSearchTool(ToolHandler):
         return tool
 
     def run_tool(self, args: dict) -> Sequence[TextContent | ImageContent | EmbeddedResource]:
-        # try:
+        """동기 방식 실행 메서드 - 기존 호환성을 위해 유지"""
         validated_args = PatentApplicantSearchArgs(**args)
         logger.info(f"applicant: {validated_args.applicant}")
 
-        result = self.api.search(
+        response = self.api.search(
             applicant=validated_args.applicant,
             patent=validated_args.patent,
             utility=validated_args.utility,
@@ -86,7 +92,41 @@ class PatentApplicantSearchTool(ToolHandler):
             sort_spec=validated_args.sort_spec,
             desc_sort=validated_args.desc_sort,
         )
-        return [TextContent(type="text", text=result.to_json(orient="records", indent=2))]
-        # except ValidationError as e:
-        #     logger.error(f"Validation error: {str(e)}")
-        #     raise ValueError("Invalid input: 출원인(applicant) 정보가 필요합니다.")
+
+        if response.empty:
+            return [TextContent(type="text", text="검색 결과가 없습니다.")]
+
+        results = []
+        for _, row in response.iterrows():
+            results.append(TextContent(type="text", text=row.to_json(orient="records", indent=2, force_ascii=False)))
+
+        return results
+
+    async def run_tool_async(self, args: dict) -> Sequence[TextContent | ImageContent | EmbeddedResource]:
+        """비동기 방식 실행 메서드"""
+        validated_args = PatentApplicantSearchArgs(**args)
+        logger.info(f"applicant: {validated_args.applicant}")
+
+        # PatentApplicantSearchAPI의 search 메서드를 비동기로 호출
+        # 현재 API 클래스를 그대로 사용하고 asyncio.to_thread로 비동기적으로 실행
+        response = await asyncio.to_thread(
+            self.api.search,
+            applicant=validated_args.applicant,
+            patent=validated_args.patent,
+            utility=validated_args.utility,
+            lastvalue=validated_args.lastvalue,
+            docs_start=validated_args.docs_start,
+            docs_count=validated_args.docs_count,
+            sort_spec=validated_args.sort_spec,
+            desc_sort=validated_args.desc_sort,
+        )
+
+        if response.empty:
+            return [TextContent(type="text", text="검색 결과가 없습니다.")]
+
+        # 결과 처리도 비동기적으로 수행
+        results = []
+        for _, row in response.iterrows():
+            results.append(TextContent(type="text", text=row.to_json(orient="records", indent=2, force_ascii=False)))
+
+        return results

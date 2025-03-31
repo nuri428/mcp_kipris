@@ -1,4 +1,6 @@
+import asyncio
 import logging
+import os
 import typing as t
 from collections.abc import Sequence
 
@@ -9,6 +11,11 @@ from mcp_kipris.kipris.abc import ToolHandler
 from mcp_kipris.kipris.api.korean.free_search_api import PatentFreeSearchAPI
 
 logger = logging.getLogger("mcp-kipris")
+
+api_key = os.getenv("KIPRIS_API_KEY")
+
+if not api_key:
+    raise ValueError("KIPRIS_API_KEY environment variable required.")
 
 
 class PatentKeywordSearchArgs(BaseModel):
@@ -25,7 +32,7 @@ class PatentKeywordSearchArgs(BaseModel):
 class PatentKeywordSearchTool(ToolHandler):
     def __init__(self):
         super().__init__("patent_keyword_search")
-        self.api = PatentFreeSearchAPI()
+        self.api = PatentFreeSearchAPI(api_key=api_key)
         self.description = "patent search by keyword, this tool is for korean patent search"
         self.args_schema = PatentKeywordSearchArgs
 
@@ -73,6 +80,40 @@ class PatentKeywordSearchTool(ToolHandler):
                 desc_sort=validated_args.desc_sort,
                 sort_spec=validated_args.sort_spec,
             )
+
+            # 검색 결과가 없는 경우 처리
+            if response.empty:
+                return [TextContent(type="text", text="검색 결과가 없습니다.")]
+
+            result = [TextContent(type="text", text=response.to_json(orient="records", indent=2, force_ascii=False))]
+            return result
+        except ValidationError as e:
+            logger.error(f"Validation error: {str(e)}")
+            raise ValueError("Invalid input: 검색어(search_word) 정보가 필요합니다.")
+
+    async def run_tool_async(self, args: dict) -> Sequence[TextContent | ImageContent | EmbeddedResource]:
+        """키워드 검색 비동기 실행 메서드"""
+        try:
+            validated_args = PatentKeywordSearchArgs(**args)
+            logger.info(f"search_word: {validated_args.search_word}")
+
+            # 기존 API 클래스를 asyncio.to_thread로 비동기적으로 호출
+            response = await asyncio.to_thread(
+                self.api.search,
+                word=validated_args.search_word,
+                patent=validated_args.patent,
+                utility=validated_args.utility,
+                lastvalue=validated_args.lastvalue,
+                docs_start=validated_args.docs_start,
+                docs_count=validated_args.docs_count,
+                desc_sort=validated_args.desc_sort,
+                sort_spec=validated_args.sort_spec,
+            )
+
+            # 검색 결과가 없는 경우 처리
+            if response.empty:
+                return [TextContent(type="text", text="검색 결과가 없습니다.")]
+
             result = [TextContent(type="text", text=response.to_json(orient="records", indent=2, force_ascii=False))]
             return result
         except ValidationError as e:

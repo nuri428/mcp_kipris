@@ -1,8 +1,11 @@
 import logging
+import os
 import typing as t
 from collections.abc import Sequence
 
 import pandas as pd
+
+# from icecream import ic
 from mcp.types import EmbeddedResource, ImageContent, TextContent, Tool
 from pydantic import BaseModel, Field, ValidationError, field_validator
 
@@ -11,6 +14,10 @@ from mcp_kipris.kipris.api.foreign.applicant_search import ForeignPatentApplican
 from mcp_kipris.kipris.tools.code import country_dict, sort_field_dict
 
 logger = logging.getLogger("mcp-kipris")
+api_key = os.getenv("KIPRIS_API_KEY")
+
+if not api_key:
+    raise ValueError("KIPRIS_API_KEY environment variable required.")
 
 
 class ForeignPatentApplicantSearchArgs(BaseModel):
@@ -40,8 +47,8 @@ class ForeignPatentApplicantSearchArgs(BaseModel):
 
 class ForeignPatentApplicantSearchTool(ToolHandler):
     def __init__(self):
-        sum
-        self.api = ForeignPatentApplicantSearchAPI()
+        super().__init__("foreign_patent_applicant_search")
+        self.api = ForeignPatentApplicantSearchAPI(api_key=api_key)
         self.description = "foreign patent search by applicant, this tool is for foreign(US, EP, WO, JP, PJ, CP, CN, TW, RU, CO, SE, ES, IL) patent search"
         self.args_schema = ForeignPatentApplicantSearchArgs
 
@@ -57,14 +64,14 @@ class ForeignPatentApplicantSearchTool(ToolHandler):
                     "sort_field": {
                         "type": "string",
                         "description": "정렬 기준 필드",
-                        "enum": list(self.api.sort_field_dict.keys()),
+                        "enum": list(sort_field_dict.keys()),
                         "default": "AD",
                     },
                     "sort_state": {"type": "boolean", "description": "정렬 상태 (기본값: true)"},
                     "collection_values": {
                         "type": "string",
                         "description": "검색 대상 국가",
-                        "enum": list(self.api.country.keys()),
+                        "enum": list(country_dict.keys()),
                         "default": "US",
                     },
                 },
@@ -101,7 +108,14 @@ class ForeignPatentApplicantSearchTool(ToolHandler):
                 sort_state=validated_args.sort_state,
                 collection_values=validated_args.collection_values,
             )
-            result = [TextContent(type="text", text=response.to_json(orient="records", indent=2, force_ascii=False))]
+            # ic(response)
+            if response.empty:
+                return [TextContent(type="text", text="검색 결과가 없습니다.")]
+            else:
+                result = [
+                    TextContent(type="text", text=row.to_json(orient="records", indent=2, force_ascii=False))
+                    for _, row in response.iterrows()
+                ]
             return result
         except ValidationError as e:
             logger.error(f"Validation error: {str(e)}")
@@ -112,10 +126,10 @@ class ForeignPatentApplicantSearchTool(ToolHandler):
                     raise ValueError("Invalid input: 출원인명(applicant) 정보가 필요합니다.")
                 elif field == "collection_values":
                     raise ValueError(
-                        f"Invalid input: 국가 코드(collection_values)는 다음 중 하나여야 합니다: {', '.join(self.api.country.keys())}"
+                        f"Invalid input: 국가 코드(collection_values)는 다음 중 하나여야 합니다: {', '.join(country_dict.keys())}"
                     )
                 elif field == "sort_field":
                     raise ValueError(
-                        f"Invalid input: 정렬 기준(sort_field)은 다음 중 하나여야 합니다: {', '.join(self.api.sort_field_dict.keys())}"
+                        f"Invalid input: 정렬 기준(sort_field)은 다음 중 하나여야 합니다: {', '.join(sort_field_dict.keys())}"
                     )
             raise ValueError("Invalid input: 입력값이 올바르지 않습니다.")

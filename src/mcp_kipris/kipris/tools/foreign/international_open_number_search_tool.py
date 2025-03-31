@@ -1,4 +1,5 @@
 import logging
+import os
 import typing as t
 from collections.abc import Sequence
 
@@ -11,6 +12,10 @@ from mcp_kipris.kipris.api.foreign.international_open_number_search import Forei
 from mcp_kipris.kipris.tools.code import country_dict, sort_field_dict
 
 logger = logging.getLogger("mcp-kipris")
+api_key = os.getenv("KIPRIS_API_KEY")
+
+if not api_key:
+    raise ValueError("KIPRIS_API_KEY environment variable required.")
 
 
 class ForeignPatentInternationalOpenNumberSearchArgs(BaseModel):
@@ -41,7 +46,7 @@ class ForeignPatentInternationalOpenNumberSearchArgs(BaseModel):
 class ForeignPatentInternationalOpenNumberSearchTool(ToolHandler):
     def __init__(self):
         super().__init__("foreign_patent_international_open_number_search")
-        self.api = ForeignPatentInternationalOpenNumberSearchAPI()
+        self.api = ForeignPatentInternationalOpenNumberSearchAPI(api_key=api_key)
         self.description = "foreign patent search by international open number, this tool is for foreign(US, EP, WO, JP, PJ, CP, CN, TW, RU, CO, SE, ES, IL) patent search"
         self.args_schema = ForeignPatentInternationalOpenNumberSearchArgs
 
@@ -112,10 +117,10 @@ class ForeignPatentInternationalOpenNumberSearchTool(ToolHandler):
                     raise ValueError("Invalid input: 국제공개번호(international_open_number) 정보가 필요합니다.")
                 elif field == "collection_values":
                     raise ValueError(
-                        f"Invalid input: 국가 코드(collection_values)는 다음 중 하나여야 합니다: {', '.join(self.api.country.keys())}"
+                        f"Invalid input: 국가 코드(collection_values)는 다음 중 하나여야 합니다: {', '.join(country_dict.keys())}"
                     )
                 elif field == "sort_field":
                     raise ValueError(
-                        f"Invalid input: 정렬 기준(sort_field)은 다음 중 하나여야 합니다: {', '.join(self.api.sort_field_dict.keys())}"
+                        f"Invalid input: 정렬 기준(sort_field)은 다음 중 하나여야 합니다: {', '.join(sort_field_dict.keys())}"
                     )
             raise ValueError("Invalid input: 입력값이 올바르지 않습니다.")

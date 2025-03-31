@@ -1,4 +1,6 @@
+import asyncio
 import logging
+import os
 import typing as t
 from collections.abc import Sequence
 
@@ -11,51 +13,21 @@ from mcp_kipris.kipris.api.korean.patent_search_api import PatentSearchAPI
 
 logger = logging.getLogger("mcp-kipris")
 
+api_key = os.getenv("KIPRIS_API_KEY")
+
+if not api_key:
+    raise ValueError("KIPRIS_API_KEY environment variable required.")
+
 
 class PatentSearchArgs(BaseModel):
-    word: str = Field("", description="Search query, default is an empty string. this field can be empty")
-    invention_title: t.Optional[str] = Field("", description="Invention title")
-    abst_cont: t.Optional[str] = Field("", description="Abstract content")
-    claim_scope: t.Optional[str] = Field("", description="Claim scope")
-    ipc_number: t.Optional[str] = Field("", description="IPC number")
-    application_number: t.Optional[str] = Field("", description="Application number")
-    open_number: t.Optional[str] = Field("", description="Open number")
-    register_number: t.Optional[str] = Field("", description="Register number")
-    priority_application_number: t.Optional[str] = Field("", description="Priority application number")
-    international_application_number: t.Optional[str] = Field("", description="International application number")
-    international_open_number: t.Optional[str] = Field("", description="International open number")
-    application_date: t.Optional[str] = Field("", description="Application date")
-    open_date: t.Optional[str] = Field("", description="Open date")
-    publication_date: t.Optional[str] = Field("", description="Publication date")
-    register_date: t.Optional[str] = Field("", description="Register date")
-    priority_application_date: t.Optional[str] = Field("", description="Priority application date")
-    international_application_date: t.Optional[str] = Field("", description="International application date")
-    international_open_date: t.Optional[str] = Field("", description="International open date")
-    applicant: t.Optional[str] = Field("", description="Applicant")
-    inventor: t.Optional[str] = Field("", description="Inventor")
-    agent: t.Optional[str] = Field("", description="Agent")
-    right_holder: t.Optional[str] = Field("", description="Right holder")
-    patent: bool = Field(True, description="Include patents, default is True")
-    utility: bool = Field(True, description="Include utility, default is True")
-    lastvalue: t.Optional[str] = Field(
-        "",
-        description="Patent registration status; (전체:공백입력, 공개:A, 취하:C, 소멸:F, 포기:G, 무효:I, 거절:J, 등록:R)",
-    )
-    page_no: int = Field(1, description="Start index for documents, default is 0")
-    num_of_rows: int = Field(10, description="Number of documents to return, default is 10")
-    desc_sort: bool = Field(True, description="Sort in descending order, default is True")
-    sort_spec: str = Field(
-        "AD",
-        description="Field to sort by; default is 'AD'(PD-공고일자, AD-출원일자, GD-등록일자, OPD-공개일자, FD-국제출원일자, FOD-국제공개일자, RD-우선권주장일자)",
-    )
+    application_number: str = Field(..., description="Application number, it must be filled")
 
 
 class PatentSearchTool(ToolHandler):
     def __init__(self):
-        super().__init__("korean_patent_search")
-        self.api = PatentSearchAPI()
-        self.description = "patent search many fields, this tool is for korean patent search"
-        self.args_schema = PatentSearchArgs
+        super().__init__("patent_search")
+        self.api = PatentSearchAPI(api_key=api_key)
+        self.description = "patent search by application number, this tool is for korean patent search"
 
     def get_tool_description(self) -> Tool:
         return Tool(
@@ -63,32 +35,56 @@ class PatentSearchTool(ToolHandler):
             description=self.description,
             inputSchema={
                 "type": "object",
+                "properties": {"application_number": {"type": "string", "description": "출원번호"}},
+                "required": ["application_number"],
+            },
+            outputSchema={
+                "type": "object",
+                "description": "특허 검색 결과 (pandas DataFrame 형식)",
                 "properties": {
-                    "word": {
-                        "type": "string",
-                        "description": "Search query, default is an empty string. this field can be empty",
-                    },
+                    "출원번호": {"type": "string", "description": "특허 출원번호"},
+                    "출원일자": {"type": "string", "description": "출원 날짜"},
+                    "발명의명칭": {"type": "string", "description": "발명의 이름"},
+                    "출원인": {"type": "string", "description": "출원인 이름"},
+                    "요약": {"type": "string", "description": "특허 요약"},
+                    "대표도면": {"type": "string", "description": "대표도면 URL"},
+                    "청구항": {"type": "array", "description": "특허 청구항 목록"},
+                    "발명자": {"type": "string", "description": "발명자 이름"},
+                    "법적상태": {"type": "string", "description": "특허의 법적 상태"},
+                    "국제출원일자": {"type": "string", "description": "국제출원일자 (있는 경우)"},
+                    "국제공개일자": {"type": "string", "description": "국제공개일자 (있는 경우)"},
+                    "DescriptionKR": {"type": "string", "description": "한글 설명"},
+                    "DescriptionEN": {"type": "string", "description": "영어 설명"},
                 },
             },
         )
 
     def run_tool(self, args: dict) -> Sequence[TextContent | ImageContent | EmbeddedResource]:
-        try:
-            validated_args = PatentSearchArgs(**args)
-            logger.info(f"search_word: {validated_args.word}")
+        validated_args = PatentSearchArgs(**args)
+        logger.info(f"application_number: {validated_args.application_number}")
 
-            response = self.api.search(
-                search_word=validated_args.word,
-                patent=validated_args.patent,
-                utility=validated_args.utility,
-                lastvalue=validated_args.lastvalue,
-                page_no=validated_args.page_no,
-                num_of_rows=validated_args.num_of_rows,
-                sort_spec=validated_args.sort_spec,
-                desc_sort=validated_args.desc_sort,
-            )
-            result = [TextContent(type="text", text=response.to_json(orient="records", indent=2, force_ascii=False))]
-            return result
-        except ValidationError as e:
-            logger.error(f"Validation error: {str(e)}")
-            raise ValueError("Invalid input: 검색어(search_word) 정보가 필요합니다.")
+        response = self.api.search(application_number=validated_args.application_number)
+
+        # 검색 결과가 없는 경우 처리
+        if response.empty:
+            return [TextContent(type="text", text="검색 결과가 없습니다.")]
+
+        # 전체 결과를 하나의 JSON으로 변환하여 반환
+        result = [TextContent(type="text", text=response.to_json(orient="records", indent=2, force_ascii=False))]
+        return result
+
+    async def run_tool_async(self, args: dict) -> Sequence[TextContent | ImageContent | EmbeddedResource]:
+        """특허 검색 비동기 실행 메서드"""
+        validated_args = PatentSearchArgs(**args)
+        logger.info(f"application_number: {validated_args.application_number}")
+
+        # 기존 API 클래스를 asyncio.to_thread로 비동기적으로 호출
+        response = await asyncio.to_thread(self.api.search, application_number=validated_args.application_number)
+
+        # 검색 결과가 없는 경우 처리
+        if response.empty:
+            return [TextContent(type="text", text="검색 결과가 없습니다.")]
+
+        # 전체 결과를 하나의 JSON으로 변환하여 반환
+        result = [TextContent(type="text", text=response.to_json(orient="records", indent=2, force_ascii=False))]
+        return result
