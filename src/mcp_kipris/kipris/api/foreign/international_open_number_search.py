@@ -40,7 +40,7 @@ class ForeignPatentInternationalOpenNumberSearchAPI(ABSKiprisAPI):
             pd.DataFrame: _description_
         """
         logger.info(f"international_open_number: {international_open_number}")
-        response = self.common_call(
+        response = self.sync_call(
             api_url=self.api_url,
             api_key_field="accessKey",
             international_open_number=international_open_number,

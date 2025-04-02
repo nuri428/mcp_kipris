@@ -40,8 +40,8 @@ class ForeignPatentFreeSearchAPI(ABSKiprisAPI):
         """
 
         logger.info(f"search word: {free}")
-        free = urllib.parse.quote(free)
-        response = self.common_call(
+
+        response = self.sync_call(
             api_url=self.api_url,
             api_key_field="accessKey",
             free=free,

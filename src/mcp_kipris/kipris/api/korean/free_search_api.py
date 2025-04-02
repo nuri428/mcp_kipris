@@ -64,9 +64,9 @@ class PatentFreeSearchAPI(ABSKiprisAPI):
             pd.DataFrame: _description_
         """
         # api url https://plus.kipris.or.kr/portal/data/service/DBII_000000000000001/view.do?menuNo=200100&kppBCode=&kppMCode=&kppSCode=&subTab=SC001&entYn=N&clasKeyword=#soap_ADI_0000000000002944
-        word = urllib.parse.quote(word)
+
         logger.info(f"word: {word}")
-        response = self.common_call(
+        response = self.sync_call(
             api_url=self.api_url,
             api_key_field="accessKey",
             word=word,

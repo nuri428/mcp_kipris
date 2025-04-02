@@ -26,11 +26,9 @@ class PatentRighterSearchAPI(ABSKiprisAPI):
         sort_spec: str = "AD",
         desc_sort: bool = False,
     ) -> pd.DataFrame:
-        if rightHoler:
-            rightHoler = urllib.parse.quote(rightHoler)
         logger.info(f"rightHoler: {rightHoler}")
 
-        response = self.common_call(
+        response = self.sync_call(
             api_url=self.api_url,
             rightHoler=rightHoler,
             docs_start=str(docs_start),

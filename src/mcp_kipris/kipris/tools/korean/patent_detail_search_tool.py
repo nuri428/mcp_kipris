@@ -19,7 +19,7 @@ if not api_key:
 
 
 class PatentDetailSearchArgs(BaseModel):
-    application_number: str = Field(..., description="Application number, it must be filled")
+    application_number: str = Field(..., description="출원번호 (숫자만, 하이픈(-) 없이 입력하세요. 예: 1020230045678)")
 
 
 class PatentDetailSearchTool(ToolHandler):
@@ -40,6 +40,17 @@ class PatentDetailSearchTool(ToolHandler):
                 "properties": {"application_number": {"type": "string", "description": "출원번호"}},
                 "required": ["application_number"],
             },
+            metadata={
+                "usage_hint": ("출원번호가 주어졌을 때, 해당 특허의 상세한 법적/기술적 정보를 보여줍니다."),
+                "example_user_queries": [
+                    "출원번호 1020250037551 특허의 상세 정보 알려줘",
+                    "두 번째 특허의 구체적인 내용을 알고 싶어",
+                ],
+                "preferred_response_style": (
+                    "정보가 많기 때문에 Markdown 형식으로 구분된 섹션별로 정리해서 보여주세요. "
+                    "예: 기본정보 / 출원인정보 / 발명자정보 / 대리인정보 / 우선권정보 등"
+                ),
+            },
         )
         logger.info(f"get_tool_description: {tool}")
         return tool
@@ -48,14 +59,15 @@ class PatentDetailSearchTool(ToolHandler):
         validated_args = PatentDetailSearchArgs(**args)
         logger.info(f"application_number: {validated_args.application_number}")
 
-        response = self.api.search(application_number=validated_args.application_number)
+        application_number = validated_args.application_number.replace("-", "")
+        response = self.api.sync_search(application_number=application_number)
 
         # 검색 결과가 없는 경우 처리
         if response.empty:
             return [TextContent(type="text", text="검색 결과가 없습니다.")]
 
         # 전체 결과를 하나의 JSON으로 변환하여 반환
-        result = [TextContent(type="text", text=response.to_json(orient="records", indent=2, force_ascii=False))]
+        result = [TextContent(type="text", text=response.to_markdown(index=False))]
         return result
 
     async def run_tool_async(self, args: dict) -> Sequence[TextContent | ImageContent | EmbeddedResource]:
@@ -63,13 +75,13 @@ class PatentDetailSearchTool(ToolHandler):
         validated_args = PatentDetailSearchArgs(**args)
         logger.info(f"application_number: {validated_args.application_number}")
 
-        # 기존 API 클래스를 asyncio.to_thread로 비동기적으로 호출
-        response = await asyncio.to_thread(self.api.search, application_number=validated_args.application_number)
+        application_number = validated_args.application_number.replace("-", "")
+        response = await self.api.async_search(application_number=application_number)
 
         # 검색 결과가 없는 경우 처리
         if response.empty:
             return [TextContent(type="text", text="검색 결과가 없습니다.")]
 
         # 전체 결과를 하나의 JSON으로 변환하여 반환
-        result = [TextContent(type="text", text=response.to_json(orient="records", indent=2, force_ascii=False))]
+        result = [TextContent(type="text", text=response.to_markdown(index=False))]
         return result

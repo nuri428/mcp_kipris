@@ -40,8 +40,7 @@ class ForeignPatentApplicantSearchAPI(ABSKiprisAPI):
         """
         logger.info(f"applicant: {applicant}")
 
-        applicant = urllib.parse.quote(applicant)
-        response = self.common_call(
+        response = self.sync_call(
             api_url=self.api_url,
             api_key_field="accessKey",
             applicant=applicant,

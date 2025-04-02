@@ -1,27 +1,32 @@
-from mcp_kipris.kipris.api.abs_class import ABSKiprisAPI
-from mcp_kipris.kipris.api.utils import get_nested_key_value
 import typing as t
-import pandas as pd
 import urllib.parse
 from logging import getLogger
 
+import pandas as pd
+
+from mcp_kipris.kipris.api.abs_class import ABSKiprisAPI
+from mcp_kipris.kipris.api.utils import get_nested_key_value
 
 logger = getLogger("mcp-kipris")
+
 
 class PatentSearchAPI(ABSKiprisAPI):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.api_url = "http://plus.kipris.or.kr/kipo-api/kipi/patUtiModInfoSearchSevice/getAdvancedSearch"
 
-    def search(self, word:str,
-                patent:bool=True,
-                utility:bool=True,
-                lastvalue:str="",
-                page_no:int=1,
-                num_of_rows:int=10,
-                desc_sort:bool=False,
-                sort_spec:str="AD",
-                **kwargs)->pd.DataFrame:
+    def search(
+        self,
+        word: str,
+        patent: bool = True,
+        utility: bool = True,
+        lastvalue: str = "",
+        page_no: int = 1,
+        num_of_rows: int = 10,
+        desc_sort: bool = False,
+        sort_spec: str = "AD",
+        **kwargs,
+    ) -> pd.DataFrame:
         """_summary_
 
         Args:
@@ -58,28 +63,25 @@ class PatentSearchAPI(ABSKiprisAPI):
         Returns:
             pd.DataFrame: _description_
         """
-        # url encoding
-        if word :
-            word = urllib.parse.quote(word)
-
+        # url encoding 제거. urlencode를 sync_call, async_call에서 처리함.
         parameters = {**kwargs}
-        for key, value in parameters.items():
-            parameters[key] = urllib.parse.quote(value)
 
         logger.info(f"word: {word}")
         logger.info(f"parameters: {parameters}")
 
-        response = self.common_call(api_url=self.api_url,
-                                  api_key_field="ServiceKey",
-                                  word=word,
-                                  patent="true" if patent else "false",
-                                  utility="true" if utility else "false",
-                                  page_no=str(page_no),
-                                  num_of_rows=str(num_of_rows),
-                                  lastvalue=str(lastvalue),
-                                  desc_sort="true" if desc_sort else "false",
-                                  sort_spec=str(sort_spec),
-                                  **parameters)
+        response = self.sync_call(
+            api_url=self.api_url,
+            api_key_field="ServiceKey",
+            word=word,
+            patent="true" if patent else "false",
+            utility="true" if utility else "false",
+            page_no=str(page_no),
+            num_of_rows=str(num_of_rows),
+            lastvalue=str(lastvalue),
+            desc_sort="true" if desc_sort else "false",
+            sort_spec=str(sort_spec),
+            **parameters,
+        )
         patents = get_nested_key_value(response, "response.body.items.item")
         if patents is None:
             logger.info("patents is None")

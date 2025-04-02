@@ -69,7 +69,7 @@ class PatentApplicationNumberSearchTool(ToolHandler):
         validated_args = PatentApplicationNumberSearchArgs(**args)
         logger.info(f"application_number: {validated_args.application_number}")
 
-        response = self.api.search(
+        response = self.api.sync_search(
             application_number=validated_args.application_number,
             docs_start=validated_args.docs_start,
             docs_count=validated_args.docs_count,
@@ -92,7 +92,7 @@ class PatentApplicationNumberSearchTool(ToolHandler):
 
         # 기존 API 클래스를 asyncio.to_thread로 비동기적으로 호출
         response = await asyncio.to_thread(
-            self.api.search,
+            self.api.sync_search,
             application_number=validated_args.application_number,
             docs_start=validated_args.docs_start,
             docs_count=validated_args.docs_count,

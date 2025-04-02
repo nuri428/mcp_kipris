@@ -40,7 +40,7 @@ class ForeignPatentApplicationNumberSearchAPI(ABSKiprisAPI):
             pd.DataFrame: _description_
         """
         logger.info(f"application_number: {application_number}")
-        response = self.common_call(
+        response = self.sync_call(
             api_url=self.api_url,
             api_key_field="accessKey",
             application_number=application_number,

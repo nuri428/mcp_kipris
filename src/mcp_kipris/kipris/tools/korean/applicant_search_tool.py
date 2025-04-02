@@ -73,6 +73,14 @@ class PatentApplicantSearchTool(ToolHandler):
                 },
                 "required": ["applicant"],
             },
+            metadata={
+                "usage_hint": "출원인 이름으로 한국 특허를 검색하고 요약 정보를 제공합니다.",
+                "example_user_queries": ["삼성전자가 출원한 최근 특허 보여줘", "LG화학이 출원한 특허 5건 알려줘"],
+                "preferred_response_style": (
+                    "출원인, 출원일자, 발명의 명칭, 출원번호를 포함하여 최근 순으로 표 형태로 정리해주세요. "
+                    "간결하고 이해하기 쉽게 응답해 주세요."
+                ),
+            },
         )
         logger.info(f"get_tool_description: {tool}")
         return tool
@@ -82,7 +90,7 @@ class PatentApplicantSearchTool(ToolHandler):
         validated_args = PatentApplicantSearchArgs(**args)
         logger.info(f"applicant: {validated_args.applicant}")
 
-        response = self.api.search(
+        response = self.api.sync_search(
             applicant=validated_args.applicant,
             patent=validated_args.patent,
             utility=validated_args.utility,
@@ -96,21 +104,15 @@ class PatentApplicantSearchTool(ToolHandler):
         if response.empty:
             return [TextContent(type="text", text="검색 결과가 없습니다.")]
 
-        results = []
-        for _, row in response.iterrows():
-            results.append(TextContent(type="text", text=row.to_json(orient="records", indent=2, force_ascii=False)))
-
-        return results
+        summary_df = response[["ApplicationNumber", "ApplicationDate", "InventionName", "RegistrationStatus"]].copy()
+        return [TextContent(type="text", text=summary_df.to_markdown(index=False))]
 
     async def run_tool_async(self, args: dict) -> Sequence[TextContent | ImageContent | EmbeddedResource]:
         """비동기 방식 실행 메서드"""
         validated_args = PatentApplicantSearchArgs(**args)
         logger.info(f"applicant: {validated_args.applicant}")
 
-        # PatentApplicantSearchAPI의 search 메서드를 비동기로 호출
-        # 현재 API 클래스를 그대로 사용하고 asyncio.to_thread로 비동기적으로 실행
-        response = await asyncio.to_thread(
-            self.api.search,
+        response = await self.api.async_search(
             applicant=validated_args.applicant,
             patent=validated_args.patent,
             utility=validated_args.utility,
@@ -124,9 +126,8 @@ class PatentApplicantSearchTool(ToolHandler):
         if response.empty:
             return [TextContent(type="text", text="검색 결과가 없습니다.")]
 
-        # 결과 처리도 비동기적으로 수행
-        results = []
-        for _, row in response.iterrows():
-            results.append(TextContent(type="text", text=row.to_json(orient="records", indent=2, force_ascii=False)))
-
-        return results
+        summary_df = response[
+            ["Applicant", "ApplicationNumber", "ApplicationDate", "InventionName", "RegistrationStatus"]
+        ].copy()
+        del response
+        return [TextContent(type="text", text=summary_df.to_markdown(index=False))]
