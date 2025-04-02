@@ -1,13 +1,12 @@
 import logging
 import os
 import typing as t
+from urllib.parse import urlencode
 
 from dotenv import load_dotenv
 from stringcase import camelcase
 
-from mcp_kipris.kipris.api.utils import get_response
-
-# from icecream import ic
+from mcp_kipris.kipris.api.utils import get_response, get_response_async
 
 logging.basicConfig(
     format="%(asctime)s - %(levelname)s - %(message)s",
@@ -31,22 +30,48 @@ class ABSKiprisAPI:
                     "KIPRIS_API_KEY is not set you must set KIPRIS_API_KEY in .env file or pass api_key to constructor "
                 )
 
-    def common_call(self, api_url: str, api_key_field="accessKey", **params) -> t.Dict:
+    def sync_call(self, api_url: str, api_key_field="accessKey", **params) -> t.Dict:
         """
         KIPRIS API 공통 호출 서비스
 
         Args:
-            sub_url (str): 서브 URL
+            api_url (str): 서브 URL
+            api_key_field (str): 키 필드 이름
+            params (dict): 파라미터
 
         Returns:
             t.List[dict]: 응답 데이터
         """
-        # url = "%s%s?"%(self.base_url, self.sub_url)
-        query = ""
-        for k, v in params.items():
-            if v is not None and v != "":
-                query += "&%s=%s" % (camelcase(k), v)
-        api_key = "&%s=%s" % (api_key_field, self.api_key)
-        full_url = f"{api_url}?{query[1:]}{api_key}"
-        logger.info(full_url)
-        return get_response(full_url)
+
+        try:
+            params_dict = {camelcase(k): v for k, v in params.items() if v is not None and v != ""}
+            params_dict[api_key_field] = self.api_key
+            full_url = f"{api_url}?{urlencode(params_dict)}"
+            logger.info(f"KIPRIS 요청 URL: {full_url}")
+            return get_response(full_url)
+        except Exception as e:
+            logger.error(f"KIPRIS 요청 실패: {e}")
+            raise
+
+    async def async_call(self, api_url: str, api_key_field="accessKey", **params) -> t.Dict:
+        """
+        KIPRIS API 비동기 호출 서비스
+
+        Args:
+            api_url (str): 서브 URL
+            api_key_field (str): 키 필드 이름
+            params (dict): 파라미터
+
+        Returns:
+            dict: 응답 데이터
+        """
+        try:
+            params_dict = {camelcase(k): v for k, v in params.items() if v is not None and v != ""}
+            params_dict[api_key_field] = self.api_key
+            full_url = f"{api_url}?{urlencode(params_dict)}"
+            print(full_url)
+            logger.info(f"[async] KIPRIS 요청 URL: {full_url}")
+            return await get_response_async(full_url)
+        except Exception as e:
+            logger.error(f"[async] KIPRIS 요청 실패: {e}")
+            raise
