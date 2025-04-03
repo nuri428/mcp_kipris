@@ -77,23 +77,6 @@ class ForeignPatentApplicantSearchTool(ToolHandler):
                 },
                 "required": ["applicant"],
             },
-            output_schema={
-                "type": "object",
-                "description": "pandas DataFrame 형태의 검색 결과",
-                "properties": {
-                    "출원번호": {"type": "string"},
-                    "출원일자": {"type": "string", "format": "date"},
-                    "발명의명칭": {"type": "string"},
-                    "출원인": {"type": "string"},
-                    "최근상태": {"type": "string"},
-                    "등록번호": {"type": "string"},
-                    "등록일자": {"type": "string", "format": "date"},
-                    "공개번호": {"type": "string"},
-                    "공개일자": {"type": "string", "format": "date"},
-                    "공고번호": {"type": "string"},
-                    "공고일자": {"type": "string", "format": "date"},
-                },
-            },
         )
 
     def run_tool(self, args: dict) -> Sequence[TextContent | ImageContent | EmbeddedResource]:
@@ -101,7 +84,7 @@ class ForeignPatentApplicantSearchTool(ToolHandler):
             validated_args = ForeignPatentApplicantSearchArgs(**args)
             logger.info(f"applicant: {validated_args.applicant}")
 
-            response = self.api.search(
+            response = self.api.sync_search(
                 applicant=validated_args.applicant,
                 current_page=validated_args.current_page,
                 sort_field=validated_args.sort_field,
@@ -111,12 +94,42 @@ class ForeignPatentApplicantSearchTool(ToolHandler):
             # ic(response)
             if response.empty:
                 return [TextContent(type="text", text="검색 결과가 없습니다.")]
-            else:
-                result = [
-                    TextContent(type="text", text=row.to_json(orient="records", indent=2, force_ascii=False))
-                    for _, row in response.iterrows()
-                ]
-            return result
+
+            return [TextContent(type="text", text=response.to_markdown(index=False))]
+        except ValidationError as e:
+            logger.error(f"Validation error: {str(e)}")
+            error_details = e.errors()
+            for error in error_details:
+                field = error["loc"][0]
+                if field == "applicant":
+                    raise ValueError("Invalid input: 출원인명(applicant) 정보가 필요합니다.")
+                elif field == "collection_values":
+                    raise ValueError(
+                        f"Invalid input: 국가 코드(collection_values)는 다음 중 하나여야 합니다: {', '.join(country_dict.keys())}"
+                    )
+                elif field == "sort_field":
+                    raise ValueError(
+                        f"Invalid input: 정렬 기준(sort_field)은 다음 중 하나여야 합니다: {', '.join(sort_field_dict.keys())}"
+                    )
+            raise ValueError("Invalid input: 입력값이 올바르지 않습니다.")
+
+    async def run_tool_async(self, args: dict) -> Sequence[TextContent | ImageContent | EmbeddedResource]:
+        try:
+            validated_args = ForeignPatentApplicantSearchArgs(**args)
+            logger.info(f"applicant: {validated_args.applicant}")
+
+            response = await self.api.async_search(
+                applicant=validated_args.applicant,
+                current_page=validated_args.current_page,
+                sort_field=validated_args.sort_field,
+                sort_state=validated_args.sort_state,
+                collection_values=validated_args.collection_values,
+            )
+
+            if response.empty:
+                return [TextContent(type="text", text="검색 결과가 없습니다.")]
+
+            return [TextContent(type="text", text=response.to_markdown(index=False))]
         except ValidationError as e:
             logger.error(f"Validation error: {str(e)}")
             error_details = e.errors()

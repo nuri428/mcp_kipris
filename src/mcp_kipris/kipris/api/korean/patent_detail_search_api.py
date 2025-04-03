@@ -16,6 +16,7 @@ class PatentDetailSearchAPI(ABSKiprisAPI):
         self.api_url = (
             "http://plus.kipris.or.kr/kipo-api/kipi/patUtiModInfoSearchSevice/getBibliographyDetailInfoSearch"
         )
+        self.KEY_STRING = "response.body.item"
 
     def sync_search(self, application_number: str, **kwargs) -> pd.DataFrame:
         """_summary_
@@ -32,15 +33,7 @@ class PatentDetailSearchAPI(ABSKiprisAPI):
         response = self.sync_call(
             api_url=self.api_url, api_key_field="ServiceKey", application_number=application_number
         )
-        patents = get_nested_key_value(response, "response.body.item")
-        logger.info(patents)
-        if patents is None:
-            logger.info("patents is None")
-            return pd.DataFrame()
-        if isinstance(patents, t.Dict):
-            patents = [patents]
-        df = pd.DataFrame(patents)
-        return df
+        return self.parse_response(response)
 
     async def async_search(self, application_number: str, **kwargs) -> pd.DataFrame:
         """_summary_
@@ -57,27 +50,4 @@ class PatentDetailSearchAPI(ABSKiprisAPI):
         response = await self.async_call(
             api_url=self.api_url, api_key_field="ServiceKey", application_number=application_number
         )
-        patents = get_nested_key_value(response, "response.body.item")
-        logger.info(patents)
-        if patents is None:
-            logger.info("patents is None")
-            return pd.DataFrame()
-        if isinstance(patents, t.Dict):
-            patents = [patents]
-        df = pd.DataFrame(patents)
-        return df
-
-
-#         if not df.empty:
-#             first = df.iloc[0]
-#             summary = f"""
-# 📄 **특허 상세 정보**
-
-# - **출원번호**: {first.get("ApplicationNumber", "")}
-# - **출원일자**: {first.get("ApplicationDate", "")}
-# - **출원인**: {first.get("Applicant", "")}
-# - **발명의 명칭**: {first.get("InventionName", "")}
-# - **초록**: {first.get("Abstract", "")[:200]}...
-# """
-#             return pd.DataFrame([{"Summary": summary.strip()}])
-# return df
+        return self.parse_response(response)

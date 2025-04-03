@@ -2,6 +2,7 @@ import logging
 import os
 import typing as t
 from collections.abc import Sequence
+from typing import List
 
 import pandas as pd
 from mcp.types import EmbeddedResource, ImageContent, TextContent, Tool
@@ -45,7 +46,7 @@ class ForeignPatentInternationalOpenNumberSearchArgs(BaseModel):
 
 class ForeignPatentInternationalOpenNumberSearchTool(ToolHandler):
     def __init__(self):
-        super().__init__("foreign_patent_international_open_number_search")
+        super().__init__("foreign_international_open_number_search")
         self.api = ForeignPatentInternationalOpenNumberSearchAPI(api_key=api_key)
         self.description = "foreign patent search by international open number, this tool is for foreign(US, EP, WO, JP, PJ, CP, CN, TW, RU, CO, SE, ES, IL) patent search"
         self.args_schema = ForeignPatentInternationalOpenNumberSearchArgs
@@ -75,39 +76,29 @@ class ForeignPatentInternationalOpenNumberSearchTool(ToolHandler):
                 },
                 "required": ["international_open_number"],
             },
-            output_schema={
-                "type": "object",
-                "description": "pandas DataFrame 형태의 검색 결과",
-                "properties": {
-                    "출원번호": {"type": "string"},
-                    "출원일자": {"type": "string", "format": "date"},
-                    "발명의명칭": {"type": "string"},
-                    "출원인": {"type": "string"},
-                    "최근상태": {"type": "string"},
-                    "등록번호": {"type": "string"},
-                    "등록일자": {"type": "string", "format": "date"},
-                    "공개번호": {"type": "string"},
-                    "공개일자": {"type": "string", "format": "date"},
-                    "공고번호": {"type": "string"},
-                    "공고일자": {"type": "string", "format": "date"},
-                },
-            },
         )
 
-    def run_tool(self, args: dict) -> Sequence[TextContent | ImageContent | EmbeddedResource]:
+    def run_tool(self, args: dict) -> List[TextContent]:
         try:
             validated_args = ForeignPatentInternationalOpenNumberSearchArgs(**args)
-            logger.info(f"international_open_number: {validated_args.international_open_number}")
+            logger.info(f"Searching for open number: {validated_args.international_open_number}")
 
-            response = self.api.search(
+            response = self.api.sync_search(
                 international_open_number=validated_args.international_open_number,
                 current_page=validated_args.current_page,
                 sort_field=validated_args.sort_field,
                 sort_state=validated_args.sort_state,
                 collection_values=validated_args.collection_values,
             )
-            result = [TextContent(type="text", text=response.to_json(orient="records", indent=2, force_ascii=False))]
-            return result
+
+            if response.empty:
+                return [TextContent(type="text", text="there is no result")]
+
+            summary_df = response[
+                ["ApplicationNumber", "ApplicationDate", "InventionName", "RegistrationStatus"]
+            ].copy()
+            return [TextContent(type="text", text=summary_df.to_markdown(index=False))]
+
         except ValidationError as e:
             logger.error(f"Validation error: {str(e)}")
             error_details = e.errors()
@@ -123,4 +114,48 @@ class ForeignPatentInternationalOpenNumberSearchTool(ToolHandler):
                     raise ValueError(
                         f"Invalid input: 정렬 기준(sort_field)은 다음 중 하나여야 합니다: {', '.join(sort_field_dict.keys())}"
                     )
-            raise ValueError("Invalid input: 입력값이 올바르지 않습니다.")
+            return [TextContent(type="text", text=f"입력값 검증 오류: {str(e)}")]
+        except Exception as e:
+            logger.error(f"Error occurred: {str(e)}")
+            return [TextContent(type="text", text=f"오류가 발생했습니다: {str(e)}")]
+
+    async def run_tool_async(self, args: dict) -> List[TextContent]:
+        try:
+            validated_args = ForeignPatentInternationalOpenNumberSearchArgs(**args)
+            logger.info(f"Searching for open number: {validated_args.international_open_number}")
+
+            response = await self.api.async_search(
+                international_open_number=validated_args.international_open_number,
+                current_page=validated_args.current_page,
+                sort_field=validated_args.sort_field,
+                sort_state=validated_args.sort_state,
+                collection_values=validated_args.collection_values,
+            )
+
+            if response.empty:
+                return [TextContent(type="text", text="there is no result")]
+
+            summary_df = response[
+                ["ApplicationNumber", "ApplicationDate", "InventionName", "RegistrationStatus"]
+            ].copy()
+            return [TextContent(type="text", text=summary_df.to_markdown(index=False))]
+
+        except ValidationError as e:
+            logger.error(f"Validation error: {str(e)}")
+            error_details = e.errors()
+            for error in error_details:
+                field = error["loc"][0]
+                if field == "international_open_number":
+                    raise ValueError("Invalid input: 국제공개번호(international_open_number) 정보가 필요합니다.")
+                elif field == "collection_values":
+                    raise ValueError(
+                        f"Invalid input: 국가 코드(collection_values)는 다음 중 하나여야 합니다: {', '.join(country_dict.keys())}"
+                    )
+                elif field == "sort_field":
+                    raise ValueError(
+                        f"Invalid input: 정렬 기준(sort_field)은 다음 중 하나여야 합니다: {', '.join(sort_field_dict.keys())}"
+                    )
+            return [TextContent(type="text", text=f"입력값 검증 오류: {str(e)}")]
+        except Exception as e:
+            logger.error(f"Error occurred: {str(e)}")
+            return [TextContent(type="text", text=f"오류가 발생했습니다: {str(e)}")]

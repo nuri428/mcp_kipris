@@ -53,22 +53,13 @@ class PatentRighterSearchTool(ToolHandler):
                 },
                 "required": ["righter_name"],
             },
-            outputSchema={
-                "type": "object",
-                "description": "특허 검색 결과 (pandas DataFrame 형식)",
-                "properties": {
-                    "출원번호": {"type": "string", "description": "특허 출원번호"},
-                    "출원일자": {"type": "string", "description": "출원 날짜"},
-                    "발명의명칭": {"type": "string", "description": "발명의 이름"},
-                    "출원인": {"type": "string", "description": "출원인 이름"},
-                    "최근상태": {"type": "string", "description": "특허의 최근 상태"},
-                    "등록번호": {"type": "string", "description": "등록번호 (있는 경우)"},
-                    "등록일자": {"type": "string", "description": "등록 날짜 (있는 경우)"},
-                    "공개번호": {"type": "string", "description": "공개번호 (있는 경우)"},
-                    "공개일자": {"type": "string", "description": "공개 날짜 (있는 경우)"},
-                    "공고번호": {"type": "string", "description": "공고번호 (있는 경우)"},
-                    "공고일자": {"type": "string", "description": "공고 날짜 (있는 경우)"},
-                },
+            metadata={
+                "usage_hint": "권리자 이름으로 한국 특허를 검색하고 요약 정보를 제공합니다.",
+                "example_user_queries": ["삼성전자가 권리자인 특허 보여줘", "LG화학이 권리자인 특허 5건 알려줘"],
+                "preferred_response_style": (
+                    "권리자, 출원일자, 발명의 명칭, 출원번호를 포함하여 최근 순으로 표 형태로 정리해주세요. "
+                    "간결하고 이해하기 쉽게 응답해 주세요."
+                ),
             },
         )
 
@@ -76,7 +67,7 @@ class PatentRighterSearchTool(ToolHandler):
         validated_args = PatentRighterSearchArgs(**args)
         logger.info(f"righter_name: {validated_args.righter_name}")
 
-        response = self.api.search(
+        response = self.api.sync_search(
             rightHoler=validated_args.righter_name,
             docs_start=validated_args.docs_start,
             docs_count=validated_args.docs_count,
@@ -88,9 +79,8 @@ class PatentRighterSearchTool(ToolHandler):
         if response.empty:
             return [TextContent(type="text", text="검색 결과가 없습니다.")]
 
-        # 전체 결과를 하나의 JSON으로 변환하여 반환
-        result = [TextContent(type="text", text=response.to_json(orient="records", indent=2, force_ascii=False))]
-        return result
+        summary_df = response[["ApplicationNumber", "ApplicationDate", "InventionName", "RegistrationStatus"]].copy()
+        return [TextContent(type="text", text=summary_df.to_markdown(index=False))]
 
     async def run_tool_async(self, args: dict) -> Sequence[TextContent | ImageContent | EmbeddedResource]:
         """권리자 검색 비동기 실행 메서드"""
@@ -98,8 +88,7 @@ class PatentRighterSearchTool(ToolHandler):
         logger.info(f"righter_name: {validated_args.righter_name}")
 
         # 기존 API 클래스를 asyncio.to_thread로 비동기적으로 호출
-        response = await asyncio.to_thread(
-            self.api.search,
+        response = await self.api.async_search(
             rightHoler=validated_args.righter_name,
             docs_start=validated_args.docs_start,
             docs_count=validated_args.docs_count,
@@ -111,6 +100,5 @@ class PatentRighterSearchTool(ToolHandler):
         if response.empty:
             return [TextContent(type="text", text="검색 결과가 없습니다.")]
 
-        # 전체 결과를 하나의 JSON으로 변환하여 반환
-        result = [TextContent(type="text", text=response.to_json(orient="records", indent=2, force_ascii=False))]
-        return result
+        summary_df = response[["ApplicationNumber", "ApplicationDate", "InventionName", "RegistrationStatus"]].copy()
+        return [TextContent(type="text", text=summary_df.to_markdown(index=False))]

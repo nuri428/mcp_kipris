@@ -13,6 +13,7 @@ class PatentApplicationNumberSearchAPI(ABSKiprisAPI):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.api_url = "http://plus.kipris.or.kr/openapi/rest/patUtiModInfoSearchSevice/applicationNumberSearchInfo"
+        self.KEY_STRING = "response.body.items.PatentUtilityInfo"
 
     def sync_search(
         self,
@@ -45,13 +46,7 @@ class PatentApplicationNumberSearchAPI(ABSKiprisAPI):
             sort_spec=str(sort_spec),
             desc_sort="true" if desc_sort else "false",
         )
-        patents = get_nested_key_value(response, "response.body.items.PatentUtilityInfo")
-        if patents is None:
-            logger.info("patents is None")
-            return pd.DataFrame()
-        if isinstance(patents, t.Dict):
-            patents = [patents]
-        return pd.DataFrame(patents)
+        return self.parse_response(response)
 
     async def async_search(
         self,
@@ -84,10 +79,4 @@ class PatentApplicationNumberSearchAPI(ABSKiprisAPI):
             sort_spec=str(sort_spec),
             desc_sort="true" if desc_sort else "false",
         )
-        patents = get_nested_key_value(response, "response.body.items.PatentUtilityInfo")
-        if patents is None:
-            logger.info("patents is None")
-            return pd.DataFrame()
-        if isinstance(patents, t.Dict):
-            patents = [patents]
-        return pd.DataFrame(patents)
+        return self.parse_response(response)

@@ -1,4 +1,5 @@
 import typing as t
+import urllib.parse
 from logging import getLogger
 
 import pandas as pd
@@ -9,26 +10,26 @@ from mcp_kipris.kipris.api.utils import get_nested_key_value
 logger = getLogger("mcp-kipris")
 
 
-class ForeignPatentApplicationNumberSearchAPI(ABSKiprisAPI):
+class ForeignPatentInternationalOpenNumberSearchAPI(ABSKiprisAPI):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.api_url = (
-            "http://plus.kipris.or.kr/openapi/rest/ForeignPatentAdvencedSearchService/applicationNumberSearch"
+            "http://plus.kipris.or.kr/openapi/rest/ForeignPatentAdvencedSearchService/internationalOpenNumberSearch"
         )
         self.KEY_STRING = "response.body.items.searchResult"
 
-    def sync_search(
+    async def async_search(
         self,
-        application_number: str,
+        open_number: str,
         current_page: int = 1,
         sort_field: str = "AD",
         sort_state: bool = True,
         collection_values: str = "US",
     ) -> pd.DataFrame:
-        """_summary_
+        """비동기 국제공개번호 검색 API 호출
 
         Args:
-            application_number (str): 특허 출원 번호
+            open_number (str): 국제공개번호
             current_page (int, optional): 페이지 번호. Defaults to 1.
             sort_field (str, optional): 정렬 기준. Defaults to "AD".
                 (AD-출원일자, PD-공고일자, GD-등록일자, OPD-공개일자, FD-국제출원일자, FOD-국제공개일자, RD-우선권주장일자)
@@ -38,13 +39,14 @@ class ForeignPatentApplicationNumberSearchAPI(ABSKiprisAPI):
                 ※다중 국가 선택 불가
 
         Returns:
-            pd.DataFrame: _description_
+            pd.DataFrame: 검색 결과
         """
-        logger.info(f"application_number: {application_number}")
-        response = self.sync_call(
+        logger.info(f"async search open_number: {open_number}")
+
+        response = await self.async_call(
             api_url=self.api_url,
             api_key_field="accessKey",
-            application_number=application_number,
+            internationalOpenNumber=open_number,
             current_page=str(current_page),
             sort_field=str(sort_field),
             sort_state="true" if sort_state else "false",
@@ -52,18 +54,18 @@ class ForeignPatentApplicationNumberSearchAPI(ABSKiprisAPI):
         )
         return self.parse_response(response)
 
-    async def async_search(
+    def sync_search(
         self,
-        application_number: str,
+        open_number: str,
         current_page: int = 1,
         sort_field: str = "AD",
         sort_state: bool = True,
         collection_values: str = "US",
     ) -> pd.DataFrame:
-        """_summary_
+        """동기 국제공개번호 검색 API 호출
 
         Args:
-            application_number (str): 특허 출원 번호
+            open_number (str): 국제공개번호
             current_page (int, optional): 페이지 번호. Defaults to 1.
             sort_field (str, optional): 정렬 기준. Defaults to "AD".
                 (AD-출원일자, PD-공고일자, GD-등록일자, OPD-공개일자, FD-국제출원일자, FOD-국제공개일자, RD-우선권주장일자)
@@ -73,13 +75,14 @@ class ForeignPatentApplicationNumberSearchAPI(ABSKiprisAPI):
                 ※다중 국가 선택 불가
 
         Returns:
-            pd.DataFrame: _description_
+            pd.DataFrame: 검색 결과
         """
-        logger.info(f"application_number: {application_number}")
-        response = await self.async_call(
+        logger.info(f"sync search open_number: {open_number}")
+
+        response = self.sync_call(
             api_url=self.api_url,
             api_key_field="accessKey",
-            application_number=application_number,
+            internationalOpenNumber=open_number,
             current_page=str(current_page),
             sort_field=str(sort_field),
             sort_state="true" if sort_state else "false",

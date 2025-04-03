@@ -38,24 +38,13 @@ class PatentSearchTool(ToolHandler):
                 "properties": {"application_number": {"type": "string", "description": "출원번호"}},
                 "required": ["application_number"],
             },
-            outputSchema={
-                "type": "object",
-                "description": "특허 검색 결과 (pandas DataFrame 형식)",
-                "properties": {
-                    "출원번호": {"type": "string", "description": "특허 출원번호"},
-                    "출원일자": {"type": "string", "description": "출원 날짜"},
-                    "발명의명칭": {"type": "string", "description": "발명의 이름"},
-                    "출원인": {"type": "string", "description": "출원인 이름"},
-                    "요약": {"type": "string", "description": "특허 요약"},
-                    "대표도면": {"type": "string", "description": "대표도면 URL"},
-                    "청구항": {"type": "array", "description": "특허 청구항 목록"},
-                    "발명자": {"type": "string", "description": "발명자 이름"},
-                    "법적상태": {"type": "string", "description": "특허의 법적 상태"},
-                    "국제출원일자": {"type": "string", "description": "국제출원일자 (있는 경우)"},
-                    "국제공개일자": {"type": "string", "description": "국제공개일자 (있는 경우)"},
-                    "DescriptionKR": {"type": "string", "description": "한글 설명"},
-                    "DescriptionEN": {"type": "string", "description": "영어 설명"},
-                },
+            metadata={
+                "usage_hint": "출원번호로 한국 특허를 검색하고 특허에 대한 기본적인 정보를 제공합니다.",
+                "example_user_queries": ["1020230045678 특허의 기본 정보를 알고 싶어."],
+                "preferred_response_style": (
+                    "출원번호, 출원일자, 발명의 명칭, 출원인을 포함하여 최근 순으로 표 형태로 정리해주세요. "
+                    "간결하고 이해하기 쉽게 응답해 주세요."
+                ),
             },
         )
 
@@ -69,9 +58,8 @@ class PatentSearchTool(ToolHandler):
         if response.empty:
             return [TextContent(type="text", text="검색 결과가 없습니다.")]
 
-        # 전체 결과를 하나의 JSON으로 변환하여 반환
-        result = [TextContent(type="text", text=response.to_json(orient="records", indent=2, force_ascii=False))]
-        return result
+        summary_df = response[["ApplicationNumber", "ApplicationDate", "InventionName", "RegistrationStatus"]].copy()
+        return [TextContent(type="text", text=summary_df.to_markdown(index=False))]
 
     async def run_tool_async(self, args: dict) -> Sequence[TextContent | ImageContent | EmbeddedResource]:
         """특허 검색 비동기 실행 메서드"""
@@ -85,6 +73,5 @@ class PatentSearchTool(ToolHandler):
         if response.empty:
             return [TextContent(type="text", text="검색 결과가 없습니다.")]
 
-        # 전체 결과를 하나의 JSON으로 변환하여 반환
-        result = [TextContent(type="text", text=response.to_json(orient="records", indent=2, force_ascii=False))]
-        return result
+        summary_df = response[["ApplicationNumber", "ApplicationDate", "InventionName", "RegistrationStatus"]].copy()
+        return [TextContent(type="text", text=summary_df.to_markdown(index=False))]

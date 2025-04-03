@@ -3,6 +3,7 @@ import logging
 import os
 import typing as t
 from collections.abc import Sequence
+from typing import List
 
 import pandas as pd
 from mcp.types import EmbeddedResource, ImageContent, TextContent, Tool
@@ -65,45 +66,60 @@ class PatentApplicationNumberSearchTool(ToolHandler):
         logger.info(f"get_tool_description: {tool}")
         return tool
 
-    def run_tool(self, args: dict) -> Sequence[TextContent | ImageContent | EmbeddedResource]:
-        validated_args = PatentApplicationNumberSearchArgs(**args)
-        logger.info(f"application_number: {validated_args.application_number}")
+    def run_tool(self, args: dict) -> Sequence[TextContent]:
+        try:
+            validated_args = PatentApplicationNumberSearchArgs(**args)
+            validated_args.application_number = validated_args.application_number.replace("-", "")
+            logger.info(f"Searching for application number: {validated_args.application_number}")
 
-        response = self.api.sync_search(
-            application_number=validated_args.application_number,
-            docs_start=validated_args.docs_start,
-            docs_count=validated_args.docs_count,
-            desc_sort=validated_args.desc_sort,
-            sort_spec=validated_args.sort_spec,
-        )
+            response = self.api.sync_search(
+                application_number=validated_args.application_number,
+                docs_count=validated_args.docs_count,
+                docs_start=validated_args.docs_start,
+                lastvalue=validated_args.lastvalue,
+                patent=validated_args.patent,
+                utility=validated_args.utility,
+                sort_spec=validated_args.sort_spec,
+                desc_sort=validated_args.desc_sort,
+            )
 
-        # 검색 결과가 없는 경우 처리
-        if response.empty:
-            return [TextContent(type="text", text="검색 결과가 없습니다.")]
+            if response.empty:
+                return [TextContent(type="text", text="there is no result")]
 
-        # 전체 결과를 하나의 JSON으로 변환하여 반환
-        result = [TextContent(type="text", text=response.to_json(orient="records", indent=2, force_ascii=False))]
-        return result
+            return [TextContent(type="text", text=response.to_markdown(index=False))]
 
-    async def run_tool_async(self, args: dict) -> Sequence[TextContent | ImageContent | EmbeddedResource]:
-        """출원번호 검색 비동기 실행 메서드"""
-        validated_args = PatentApplicationNumberSearchArgs(**args)
-        logger.info(f"application_number: {validated_args.application_number}")
+        except ValidationError as e:
+            logger.error(f"Validation error: {str(e)}")
+            return [TextContent(type="text", text=f"입력값 검증 오류: {str(e)}")]
+        except Exception as e:
+            logger.error(f"Error occurred: {str(e)}")
+            return [TextContent(type="text", text=f"오류가 발생했습니다: {str(e)}")]
 
-        # 기존 API 클래스를 asyncio.to_thread로 비동기적으로 호출
-        response = await asyncio.to_thread(
-            self.api.sync_search,
-            application_number=validated_args.application_number,
-            docs_start=validated_args.docs_start,
-            docs_count=validated_args.docs_count,
-            desc_sort=validated_args.desc_sort,
-            sort_spec=validated_args.sort_spec,
-        )
+    async def run_tool_async(self, args: dict) -> Sequence[TextContent]:
+        try:
+            validated_args = PatentApplicationNumberSearchArgs(**args)
+            validated_args.application_number = validated_args.application_number.replace("-", "")
+            logger.info(f"Searching for application number: {validated_args.application_number}")
 
-        # 검색 결과가 없는 경우 처리
-        if response.empty:
-            return [TextContent(type="text", text="검색 결과가 없습니다.")]
+            response = await self.api.async_search(
+                application_number=validated_args.application_number,
+                docs_count=validated_args.docs_count,
+                docs_start=validated_args.docs_start,
+                lastvalue=validated_args.lastvalue,
+                patent=validated_args.patent,
+                utility=validated_args.utility,
+                sort_spec=validated_args.sort_spec,
+                desc_sort=validated_args.desc_sort,
+            )
 
-        # 전체 결과를 하나의 JSON으로 변환하여 반환
-        result = [TextContent(type="text", text=response.to_json(orient="records", indent=2, force_ascii=False))]
-        return result
+            if response.empty:
+                return [TextContent(type="text", text="there is no result")]
+
+            summary_df = response[["ApplicationNumber", "ApplicationDate", "InventionName", "Applicant"]].copy()
+            return [TextContent(type="text", text=summary_df.to_markdown(index=False))]
+        except ValidationError as e:
+            logger.error(f"Validation error: {str(e)}")
+            return [TextContent(type="text", text=f"입력값 검증 오류: {str(e)}")]
+        except Exception as e:
+            logger.error(f"Error occurred: {str(e)}")
+            return [TextContent(type="text", text=f"오류가 발생했습니다: {str(e)}")]

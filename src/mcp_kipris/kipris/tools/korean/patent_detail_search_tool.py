@@ -3,6 +3,7 @@ import logging
 import os
 import typing as t
 from collections.abc import Sequence
+from typing import List
 
 import pandas as pd
 from mcp.types import EmbeddedResource, ImageContent, TextContent, Tool
@@ -55,33 +56,46 @@ class PatentDetailSearchTool(ToolHandler):
         logger.info(f"get_tool_description: {tool}")
         return tool
 
-    def run_tool(self, args: dict) -> Sequence[TextContent | ImageContent | EmbeddedResource]:
-        validated_args = PatentDetailSearchArgs(**args)
-        logger.info(f"application_number: {validated_args.application_number}")
+    def run_tool(self, args: dict) -> Sequence[TextContent]:
+        try:
+            validated_args = PatentDetailSearchArgs(**args)
+            validated_args.application_number = validated_args.application_number.replace("-", "")
+            logger.info(f"Searching for application number: {validated_args.application_number}")
 
-        application_number = validated_args.application_number.replace("-", "")
-        response = self.api.sync_search(application_number=application_number)
+            response = self.api.sync_search(
+                application_number=validated_args.application_number,
+            )
 
-        # 검색 결과가 없는 경우 처리
-        if response.empty:
-            return [TextContent(type="text", text="검색 결과가 없습니다.")]
+            if response.empty:
+                return [TextContent(type="text", text="there is no result")]
 
-        # 전체 결과를 하나의 JSON으로 변환하여 반환
-        result = [TextContent(type="text", text=response.to_markdown(index=False))]
-        return result
+            return [TextContent(type="text", text=response.to_markdown(index=False))]
 
-    async def run_tool_async(self, args: dict) -> Sequence[TextContent | ImageContent | EmbeddedResource]:
-        """특허 상세 검색 비동기 실행 메서드"""
-        validated_args = PatentDetailSearchArgs(**args)
-        logger.info(f"application_number: {validated_args.application_number}")
+        except ValidationError as e:
+            logger.error(f"Validation error: {str(e)}")
+            return [TextContent(type="text", text=f"입력값 검증 오류: {str(e)}")]
+        except Exception as e:
+            logger.error(f"Error occurred: {str(e)}")
+            return [TextContent(type="text", text=f"오류가 발생했습니다: {str(e)}")]
 
-        application_number = validated_args.application_number.replace("-", "")
-        response = await self.api.async_search(application_number=application_number)
+    async def run_tool_async(self, args: dict) -> Sequence[TextContent]:
+        try:
+            validated_args = PatentDetailSearchArgs(**args)
+            validated_args.application_number = validated_args.application_number.replace("-", "")
+            logger.info(f"Searching for application number: {validated_args.application_number}")
 
-        # 검색 결과가 없는 경우 처리
-        if response.empty:
-            return [TextContent(type="text", text="검색 결과가 없습니다.")]
+            response = await self.api.async_search(
+                application_number=validated_args.application_number,
+            )
 
-        # 전체 결과를 하나의 JSON으로 변환하여 반환
-        result = [TextContent(type="text", text=response.to_markdown(index=False))]
-        return result
+            if response.empty:
+                return [TextContent(type="text", text="there is no result")]
+
+            return [TextContent(type="text", text=response.to_markdown(index=False))]
+
+        except ValidationError as e:
+            logger.error(f"Validation error: {str(e)}")
+            return [TextContent(type="text", text=f"입력값 검증 오류: {str(e)}")]
+        except Exception as e:
+            logger.error(f"Error occurred: {str(e)}")
+            return [TextContent(type="text", text=f"오류가 발생했습니다: {str(e)}")]

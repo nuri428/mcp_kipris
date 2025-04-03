@@ -3,6 +3,7 @@ import logging
 import os
 import typing as t
 from collections.abc import Sequence
+from typing import List
 
 from mcp.types import EmbeddedResource, ImageContent, TextContent, Tool
 from pydantic import BaseModel, Field, ValidationError
@@ -18,8 +19,8 @@ if not api_key:
     raise ValueError("KIPRIS_API_KEY environment variable required.")
 
 
-class PatentKeywordSearchArgs(BaseModel):
-    search_word: str = Field(..., description="Search word, it must be filled")
+class PatentFreeSearchArgs(BaseModel):
+    word: str = Field(..., description="Search word, it must be filled")
     patent: bool = Field(True, description="Include patent search")
     utility: bool = Field(True, description="Include utility model search")
     lastvalue: str = Field("", description="Last value for pagination")
@@ -29,12 +30,12 @@ class PatentKeywordSearchArgs(BaseModel):
     sort_spec: str = Field("AD", description="Sort specification")
 
 
-class PatentKeywordSearchTool(ToolHandler):
+class PatentFreeSearchTool(ToolHandler):
     def __init__(self):
-        super().__init__("patent_keyword_search")
+        super().__init__("patent_free_search")
         self.api = PatentFreeSearchAPI(api_key=api_key)
         self.description = "patent search by keyword, this tool is for korean patent search"
-        self.args_schema = PatentKeywordSearchArgs
+        self.args_schema = PatentFreeSearchArgs
 
     def get_tool_description(self) -> Tool:
         return Tool(
@@ -43,7 +44,7 @@ class PatentKeywordSearchTool(ToolHandler):
             inputSchema={
                 "type": "object",
                 "properties": {
-                    "search_word": {"type": "string", "description": "검색어"},
+                    "word": {"type": "string", "description": "검색어"},
                     "patent": {"type": "boolean", "description": "특허 포함 여부 (기본값: true)"},
                     "utility": {"type": "boolean", "description": "실용신안 포함 여부 (기본값: true)"},
                     "lastvalue": {
@@ -61,61 +62,72 @@ class PatentKeywordSearchTool(ToolHandler):
                         "default": "AD",
                     },
                 },
-                "required": ["search_word"],
+                "required": ["word"],
+            },
+            metadata={
+                "usage_hint": "키워드로 한국 특허를 검색하고 특허에 대한 정보를 제공합니다.",
+                "example_user_queries": ["'이차전지' 관련 특허를 검색해줘"],
+                "preferred_response_style": (
+                    "키워드, 출원일자, 발명의 명칭, 출원인을 포함하여 최근 순으로 표 형태로 정리해주세요. "
+                    "간결하고 이해하기 쉽게 응답해 주세요."
+                ),
             },
         )
 
-    def run_tool(self, args: dict) -> Sequence[TextContent | ImageContent | EmbeddedResource]:
+    def run_tool(self, args: dict) -> List[TextContent]:
         try:
-            validated_args = PatentKeywordSearchArgs(**args)
-            logger.info(f"search_word: {validated_args.search_word}")
+            validated_args = PatentFreeSearchArgs(**args)
+            logger.info(f"Searching for keyword: {validated_args.word}")
 
-            response = self.api.search(
-                word=validated_args.search_word,
+            response = self.api.sync_search(
+                word=validated_args.word,
+                docs_count=validated_args.docs_count,
+                docs_start=validated_args.docs_start,
+                lastvalue=validated_args.lastvalue,
                 patent=validated_args.patent,
                 utility=validated_args.utility,
-                lastvalue=validated_args.lastvalue,
-                docs_start=validated_args.docs_start,
-                docs_count=validated_args.docs_count,
-                desc_sort=validated_args.desc_sort,
                 sort_spec=validated_args.sort_spec,
+                desc_sort=validated_args.desc_sort,
             )
 
-            # 검색 결과가 없는 경우 처리
             if response.empty:
-                return [TextContent(type="text", text="검색 결과가 없습니다.")]
+                return [TextContent(type="text", text="there is no result")]
 
-            result = [TextContent(type="text", text=response.to_json(orient="records", indent=2, force_ascii=False))]
-            return result
+            summary_df = response[["ApplicationNumber", "ApplicationDate", "InventionName", "Applicant"]].copy()
+            return [TextContent(type="text", text=summary_df.to_markdown(index=False))]
+
         except ValidationError as e:
             logger.error(f"Validation error: {str(e)}")
-            raise ValueError("Invalid input: 검색어(search_word) 정보가 필요합니다.")
+            return [TextContent(type="text", text=f"입력값 검증 오류: {str(e)}")]
+        except Exception as e:
+            logger.error(f"Error occurred: {str(e)}")
+            return [TextContent(type="text", text=f"오류가 발생했습니다: {str(e)}")]
 
-    async def run_tool_async(self, args: dict) -> Sequence[TextContent | ImageContent | EmbeddedResource]:
-        """키워드 검색 비동기 실행 메서드"""
+    async def run_tool_async(self, args: dict) -> List[TextContent]:
         try:
-            validated_args = PatentKeywordSearchArgs(**args)
-            logger.info(f"search_word: {validated_args.search_word}")
+            validated_args = PatentFreeSearchArgs(**args)
+            logger.info(f"Searching for keyword: {validated_args.word}")
 
-            # 기존 API 클래스를 asyncio.to_thread로 비동기적으로 호출
-            response = await asyncio.to_thread(
-                self.api.search,
-                word=validated_args.search_word,
+            response = await self.api.async_search(
+                word=validated_args.word,
+                docs_count=validated_args.docs_count,
+                docs_start=validated_args.docs_start,
+                lastvalue=validated_args.lastvalue,
                 patent=validated_args.patent,
                 utility=validated_args.utility,
-                lastvalue=validated_args.lastvalue,
-                docs_start=validated_args.docs_start,
-                docs_count=validated_args.docs_count,
-                desc_sort=validated_args.desc_sort,
                 sort_spec=validated_args.sort_spec,
+                desc_sort=validated_args.desc_sort,
             )
 
-            # 검색 결과가 없는 경우 처리
             if response.empty:
-                return [TextContent(type="text", text="검색 결과가 없습니다.")]
+                return [TextContent(type="text", text="there is no result")]
 
-            result = [TextContent(type="text", text=response.to_json(orient="records", indent=2, force_ascii=False))]
-            return result
+            summary_df = response[["ApplicationNumber", "ApplicationDate", "InventionName", "Applicant"]].copy()
+            return [TextContent(type="text", text=summary_df.to_markdown(index=False))]
+
         except ValidationError as e:
             logger.error(f"Validation error: {str(e)}")
-            raise ValueError("Invalid input: 검색어(search_word) 정보가 필요합니다.")
+            return [TextContent(type="text", text=f"입력값 검증 오류: {str(e)}")]
+        except Exception as e:
+            logger.error(f"Error occurred: {str(e)}")
+            return [TextContent(type="text", text=f"오류가 발생했습니다: {str(e)}")]

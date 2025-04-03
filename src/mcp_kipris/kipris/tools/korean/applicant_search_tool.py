@@ -3,6 +3,7 @@ import logging
 import os
 import typing as t
 from collections.abc import Sequence
+from typing import List
 
 import pandas as pd
 from mcp.types import EmbeddedResource, ImageContent, TextContent, Tool
@@ -85,49 +86,62 @@ class PatentApplicantSearchTool(ToolHandler):
         logger.info(f"get_tool_description: {tool}")
         return tool
 
-    def run_tool(self, args: dict) -> Sequence[TextContent | ImageContent | EmbeddedResource]:
-        """동기 방식 실행 메서드 - 기존 호환성을 위해 유지"""
-        validated_args = PatentApplicantSearchArgs(**args)
-        logger.info(f"applicant: {validated_args.applicant}")
+    def run_tool(self, args: dict) -> Sequence[TextContent]:
+        try:
+            validated_args = PatentApplicantSearchArgs(**args)
+            logger.info(f"Searching for applicant: {validated_args.applicant}")
 
-        response = self.api.sync_search(
-            applicant=validated_args.applicant,
-            patent=validated_args.patent,
-            utility=validated_args.utility,
-            lastvalue=validated_args.lastvalue,
-            docs_start=validated_args.docs_start,
-            docs_count=validated_args.docs_count,
-            sort_spec=validated_args.sort_spec,
-            desc_sort=validated_args.desc_sort,
-        )
+            response = self.api.sync_search(
+                applicant=validated_args.applicant,
+                docs_count=validated_args.docs_count,
+                docs_start=validated_args.docs_start,
+                lastvalue=validated_args.lastvalue,
+                patent=validated_args.patent,
+                utility=validated_args.utility,
+                sort_spec=validated_args.sort_spec,
+                desc_sort=validated_args.desc_sort,
+            )
 
-        if response.empty:
-            return [TextContent(type="text", text="검색 결과가 없습니다.")]
+            if response.empty:
+                return [TextContent(type="text", text="there is no result")]
 
-        summary_df = response[["ApplicationNumber", "ApplicationDate", "InventionName", "RegistrationStatus"]].copy()
-        return [TextContent(type="text", text=summary_df.to_markdown(index=False))]
+            summary_df = response[["ApplicationNumber", "ApplicationDate", "InventionName", "Applicant"]].copy()
+            del response
+            return [TextContent(type="text", text=summary_df.to_markdown(index=False))]
 
-    async def run_tool_async(self, args: dict) -> Sequence[TextContent | ImageContent | EmbeddedResource]:
-        """비동기 방식 실행 메서드"""
-        validated_args = PatentApplicantSearchArgs(**args)
-        logger.info(f"applicant: {validated_args.applicant}")
+        except ValidationError as e:
+            logger.error(f"Validation error: {str(e)}")
+            return [TextContent(type="text", text=f"입력값 검증 오류: {str(e)}")]
+        except Exception as e:
+            logger.error(f"Error occurred: {str(e)}")
+            return [TextContent(type="text", text=f"오류가 발생했습니다: {str(e)}")]
 
-        response = await self.api.async_search(
-            applicant=validated_args.applicant,
-            patent=validated_args.patent,
-            utility=validated_args.utility,
-            lastvalue=validated_args.lastvalue,
-            docs_start=validated_args.docs_start,
-            docs_count=validated_args.docs_count,
-            sort_spec=validated_args.sort_spec,
-            desc_sort=validated_args.desc_sort,
-        )
+    async def run_tool_async(self, args: dict) -> Sequence[TextContent]:
+        try:
+            validated_args = PatentApplicantSearchArgs(**args)
+            logger.info(f"Searching for applicant: {validated_args.applicant}")
 
-        if response.empty:
-            return [TextContent(type="text", text="검색 결과가 없습니다.")]
+            response = await self.api.async_search(
+                applicant=validated_args.applicant,
+                docs_count=validated_args.docs_count,
+                docs_start=validated_args.docs_start,
+                lastvalue=validated_args.lastvalue,
+                patent=validated_args.patent,
+                utility=validated_args.utility,
+                sort_spec=validated_args.sort_spec,
+                desc_sort=validated_args.desc_sort,
+            )
 
-        summary_df = response[
-            ["Applicant", "ApplicationNumber", "ApplicationDate", "InventionName", "RegistrationStatus"]
-        ].copy()
-        del response
-        return [TextContent(type="text", text=summary_df.to_markdown(index=False))]
+            if response.empty:
+                return [TextContent(type="text", text="there is no result")]
+            # logger.info(f"response: {response.columns}")
+            summary_df = response[["ApplicationNumber", "ApplicationDate", "InventionName", "Applicant"]].copy()
+            del response
+            return [TextContent(type="text", text=summary_df.to_markdown(index=False))]
+
+        except ValidationError as e:
+            logger.error(f"Validation error: {str(e)}")
+            return [TextContent(type="text", text=f"입력값 검증 오류: {str(e)}")]
+        except Exception as e:
+            logger.error(f"Error occurred: {str(e)}")
+            return [TextContent(type="text", text=f"오류가 발생했습니다: {str(e)}")]
