@@ -3,10 +3,11 @@ import os
 import typing as t
 from urllib.parse import urlencode
 
+import pandas as pd
 from dotenv import load_dotenv
 from stringcase import camelcase
 
-from mcp_kipris.kipris.api.utils import get_response, get_response_async
+from mcp_kipris.kipris.api.utils import get_nested_key_value, get_response, get_response_async
 
 logging.basicConfig(
     format="%(asctime)s - %(levelname)s - %(message)s",
@@ -20,6 +21,8 @@ load_dotenv()
 # ic.disable()
 class ABSKiprisAPI:
     def __init__(self, **kwargs):
+        self.HEADER_KEY_STRING = "response.body.items.item"
+        self.KEY_STRING = ""
         if "api_key" in kwargs:
             self.api_key = kwargs["api_key"]
         else:
@@ -75,3 +78,15 @@ class ABSKiprisAPI:
         except Exception as e:
             logger.error(f"[async] KIPRIS 요청 실패: {e}")
             raise
+
+    def parse_response(self, response: dict) -> pd.DataFrame:
+        patents = get_nested_key_value(response, self.KEY_STRING)
+        if patents is None:
+            logger.info("patents is None")
+            message = get_nested_key_value(response, self.HEADER_KEY_STRING)
+            if message:
+                logger.warning(f"KIPRIS API 응답 메시지: {message}")
+            return pd.DataFrame()
+        if isinstance(patents, t.Dict):
+            patents = [patents]
+        return pd.DataFrame(patents)
