@@ -36,7 +36,7 @@ api = PatentRighterSearchAPI(api_key=api_key)
 
 # 권리자 검색 수행
 print("삼성전자 권리자 검색 시작...")
-df = api.search(rightHoler="삼성전자", docs_start=1, docs_count=3, desc_sort=True)
+df = api.sync_search(rightHoler="삼성전자", docs_start=1, docs_count=3, desc_sort=True)
 
 # 결과 확인
 if df.empty:
