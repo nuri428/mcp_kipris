@@ -1,6 +1,12 @@
 # MCP KIPRIS
 
-KIPRIS(한국특허정보원) API를 사용하여 특허 정보를 검색하고 조회할 수 있는 MCP(Multi-Channel Platform) 도구입니다.
+KIPRIS(한국특허정보원) API를 사용하여 특허 정보를 검색하고 조회할 수 있는 MCP(Model Context Prompt) 도구입니다.
+
+## Claude 설정
+
+ Claude를 사용하기 위한 설정은 다음과 같습니다:
+
+![Claude Settings](assets/Claude-settings.png)
 
 ## 기능
 
