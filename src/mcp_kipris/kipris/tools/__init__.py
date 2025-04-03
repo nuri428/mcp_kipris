@@ -16,9 +16,7 @@ from mcp_kipris.kipris.tools.korean.application_number_search_tool import (
 from mcp_kipris.kipris.tools.korean.patent_detail_search_tool import (
     PatentDetailSearchTool as KoreanPatentDetailSearchTool,
 )
-from mcp_kipris.kipris.tools.korean.patent_keyword_search_tool import (
-    PatentKeywordSearchTool as KoreanPatentKeywordSearchTool,
-)
+from mcp_kipris.kipris.tools.korean.patent_free_search_tool import PatentFreeSearchTool as KoreanPatentFreeSearchTool
 from mcp_kipris.kipris.tools.korean.patent_search_tool import PatentSearchTool as KoreanPatentSearchTool
 from mcp_kipris.kipris.tools.korean.patent_summary_search_tool import (
     PatentSummarySearchTool as KoreanPatentSummarySearchTool,
@@ -27,7 +25,7 @@ from mcp_kipris.kipris.tools.korean.righter_search_tool import PatentRighterSear
 
 __all__ = [
     "KoreanPatentApplicantSearchTool",
-    "KoreanPatentKeywordSearchTool",
+    "KoreanPatentFreeSearchTool",
     "KoreanPatentSearchTool",
     "KoreanPatentRighterSearchTool",
     "KoreanPatentApplicationNumberSearchTool",

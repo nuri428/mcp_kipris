@@ -20,7 +20,7 @@ from mcp_kipris.kipris.tools import (
     KoreanPatentApplicantSearchTool,
     KoreanPatentApplicationNumberSearchTool,
     KoreanPatentDetailSearchTool,
-    KoreanPatentKeywordSearchTool,
+    KoreanPatentFreeSearchTool,
     KoreanPatentRighterSearchTool,
     KoreanPatentSearchTool,
     KoreanPatentSummarySearchTool,
@@ -57,7 +57,7 @@ def get_tool_handler(name: str) -> ToolHandler | None:
 
 
 add_tool_handler(KoreanPatentApplicantSearchTool())
-add_tool_handler(KoreanPatentKeywordSearchTool())
+add_tool_handler(KoreanPatentFreeSearchTool())
 add_tool_handler(KoreanPatentSearchTool())
 add_tool_handler(KoreanPatentRighterSearchTool())
 add_tool_handler(KoreanPatentApplicationNumberSearchTool())

@@ -23,12 +23,12 @@ sys.path.insert(0, str(project_root / "src"))
 load_dotenv(project_root / "src" / ".env")
 
 # 특허 검색 도구 import
-from mcp_kipris.kipris.tools.korean.patent_keyword_search_tool import PatentKeywordSearchTool
+from mcp_kipris.kipris.tools.korean.patent_free_search_tool import PatentFreeSearchTool
 
 
 def main():
     # 검색 도구 인스턴스화
-    tool = PatentKeywordSearchTool()
+    tool = PatentFreeSearchTool()
 
     # 키워드 검색 ("인공지능")
     print("'인공지능' 키워드로 특허 검색 중...")
@@ -53,7 +53,7 @@ def main():
     async def test_async():
         return await tool.run_tool_async(
             {
-                "search_word": "인공지능",  # 검색 키워드
+                "word": "인공지능",  # 검색 키워드
                 "patent": True,  # 특허 검색
                 "utility": True,  # 실용신안 검색
                 "docs_count": 3,  # 검색 결과 수: 3개
