@@ -1,5 +1,6 @@
 import datetime
 import json
+import logging
 import traceback
 import typing as t
 from logging import getLogger
@@ -9,7 +10,12 @@ import httpx
 import requests
 import xmltodict
 
-logger = getLogger("mcp-kipris")
+logging.basicConfig(
+    format="%(asctime)s - %(levelname)s - %(message)s",
+    level=logging.INFO,  # INFO 레벨을 출력
+    handlers=[logging.StreamHandler()],
+)
+logger = logging.getLogger("mcp-kipris")
 
 
 def get_nested_key_value(dictionary: t.Dict, nested_key: str, sep: str = ".", default_value=None) -> t.Any:
