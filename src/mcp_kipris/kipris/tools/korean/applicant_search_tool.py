@@ -75,8 +75,12 @@ class PatentApplicantSearchTool(ToolHandler):
                 "required": ["applicant"],
             },
             metadata={
-                "usage_hint": "출원인 이름으로 한국 특허를 검색하고 요약 정보를 제공합니다.",
-                "example_user_queries": ["삼성전자가 출원한 최근 특허 보여줘", "LG화학이 출원한 특허 5건 알려줘"],
+                "usage_hint": "출원인(특허를 출원한 사람 또는 회사)의 이름으로 한국 특허를 검색합니다. 권리자(특허권자)와는 다릅니다.",
+                "example_user_queries": [
+                    "삼성전자가 출원한 특허 보여줘",
+                    "LG화학이 최근 출원한 특허 5건 검색해줘",
+                    "네이버가 출원한 특허 목록 알려줘",
+                ],
                 "preferred_response_style": (
                     "출원인, 출원일자, 발명의 명칭, 출원번호를 포함하여 최근 순으로 표 형태로 정리해주세요. "
                     "간결하고 이해하기 쉽게 응답해 주세요."

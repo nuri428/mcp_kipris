@@ -31,7 +31,7 @@ class PatentRighterSearchTool(ToolHandler):
     def __init__(self):
         super().__init__("patent_righter_search")
         self.api = PatentRighterSearchAPI(api_key=api_key)
-        self.description = "patent search by righter name, this tool is for korean patent search"
+        self.description = "Search patents by right holder name (권리자), distinct from applicant (출원인)"
 
     def get_tool_description(self) -> Tool:
         return Tool(
@@ -54,8 +54,13 @@ class PatentRighterSearchTool(ToolHandler):
                 "required": ["righter_name"],
             },
             metadata={
-                "usage_hint": "권리자 이름으로 한국 특허를 검색하고 요약 정보를 제공합니다.",
-                "example_user_queries": ["삼성전자가 권리자인 특허 보여줘", "LG화학이 권리자인 특허 5건 알려줘"],
+                "usage_hint": "권리자(특허권자)의 이름으로 한국 특허를 검색하고 요약 정보를 제공합니다. 출원인과는 다릅니다.",
+                "example_user_queries": [
+                    "삼성전자가 권리자인 특허 보여줘",
+                    "LG화학이 특허권자인 특허 5건 알려줘",
+                    "현대모비스가 특허권을 보유한 특허를 찾아줘",
+                    "특허권자가 네이버인 특허 목록 알려줘",
+                ],
                 "preferred_response_style": (
                     "권리자, 출원일자, 발명의 명칭, 출원번호를 포함하여 최근 순으로 표 형태로 정리해주세요. "
                     "간결하고 이해하기 쉽게 응답해 주세요."
