@@ -80,13 +80,13 @@ class ABSKiprisAPI:
             raise
 
     def parse_response(self, response: dict) -> pd.DataFrame:
-        patents = get_nested_key_value(response, self.KEY_STRING)
-        if patents is None:
+        res_dict = get_nested_key_value(response, self.KEY_STRING)
+        if res_dict is None:
             logger.info("patents is None")
             message = get_nested_key_value(response, self.HEADER_KEY_STRING)
             if message:
                 logger.warning(f"KIPRIS API 응답 메시지: {message}")
             return pd.DataFrame()
-        if isinstance(patents, t.Dict):
-            patents = [patents]
-        return pd.DataFrame(patents)
+        if isinstance(res_dict, t.Dict):
+            res_dict = [res_dict]
+        return pd.DataFrame(res_dict)
