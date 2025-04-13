@@ -27,7 +27,7 @@ from mcp_kipris.kipris.tools import (
     KoreanPatentApplicantSearchTool,
     KoreanPatentApplicationNumberSearchTool,
     KoreanPatentDetailSearchTool,
-    KoreanPatentKeywordSearchTool,
+    KoreanPatentFreeSearchTool,
     KoreanPatentRighterSearchTool,
     KoreanPatentSearchTool,
     KoreanPatentSummarySearchTool,
@@ -64,12 +64,12 @@ def get_tool_handler(name: str) -> ToolHandler | None:
 
 
 add_tool_handler(KoreanPatentApplicantSearchTool())
-add_tool_handler(KoreanPatentKeywordSearchTool())
 add_tool_handler(KoreanPatentSearchTool())
 add_tool_handler(KoreanPatentRighterSearchTool())
 add_tool_handler(KoreanPatentApplicationNumberSearchTool())
 add_tool_handler(KoreanPatentSummarySearchTool())
 add_tool_handler(KoreanPatentDetailSearchTool())
+add_tool_handler(KoreanPatentFreeSearchTool())
 add_tool_handler(ForeignPatentApplicantSearchTool())
 add_tool_handler(ForeignPatentApplicationNumberSearchTool())
 add_tool_handler(ForeignPatentFreeSearchTool())
@@ -156,17 +156,20 @@ def create_starlette_app(mcp_server: Server, *, debug: bool = False) -> Starlett
     sse = SseServerTransport("/messages/")
 
     async def handle_sse(request: Request) -> Response:
-        """SSE 연결을 처리하는 엔드포인트"""
         try:
+            logger.info("🔗 [SSE] New connection request received")
             async with sse.connect_sse(request.scope, request.receive, request._send) as (read_stream, write_stream):
+                logger.info("✅ [SSE] Connected, running MCP server...")
                 await mcp_server.run(
                     read_stream,
                     write_stream,
                     mcp_server.create_initialization_options(),
                 )
+                logger.info("🔥 MCP server run() completed")
+            logger.info("🔌 [SSE] Disconnected cleanly")
             return Response(status_code=204)
         except Exception as e:
-            logger.error(f"SSE connection error: {str(e)}")
+            logger.error(f"❌ [SSE] Connection error: {str(e)}")
             return Response(status_code=500)
 
     async def list_tools(request: Request) -> JSONResponse:
@@ -211,9 +214,9 @@ def create_starlette_app(mcp_server: Server, *, debug: bool = False) -> Starlett
     return Starlette(
         debug=debug,
         routes=[
-            Route("/messages/", endpoint=handle_sse),
-            Route("/tools", endpoint=list_tools, methods=["GET"]),
-            Route("/messages/", endpoint=handle_post_message, methods=["POST"]),
+            Route("/sse/", endpoint=handle_sse),
+            Route("/tools", endpoint=list_tools),
+            Mount("/messages/", app=sse.handle_post_message),
         ],
     )
 
@@ -235,6 +238,7 @@ async def main():
             config = uvicorn.Config(app=starlette_app, host=args.host, port=args.port)
             server = uvicorn.Server(config=config)
             await server.serve()
+
         except Exception as e:
             logger.error(f"SSE server error occurred: {str(e)}")
             raise RuntimeError(f"SSE Server Error: {str(e)}")
