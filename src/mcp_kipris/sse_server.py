@@ -7,7 +7,7 @@ from collections.abc import Sequence
 from typing import List
 
 import uvicorn
-from dotenv import load_dotenv
+from dotenv import find_dotenv, load_dotenv
 from mcp.server import Server
 from mcp.server.sse import SseServerTransport
 from mcp.server.stdio import stdio_server
@@ -33,7 +33,7 @@ from mcp_kipris.kipris.tools import (
     KoreanPatentSummarySearchTool,
 )
 
-load_dotenv()
+_ = load_dotenv(find_dotenv(".env"))
 
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger("mcp-kipris")
