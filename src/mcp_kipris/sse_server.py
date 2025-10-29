@@ -1,5 +1,6 @@
 import argparse
 import datetime
+import json
 import logging
 import os
 import sys
@@ -155,6 +156,27 @@ def create_starlette_app(mcp_server: Server, *, debug: bool = False) -> Starlett
     """Create a Starlette application that can serve the provided mcp server with SSE."""
     sse = SseServerTransport("/messages/")
 
+    async def well_known_mcp(request):
+        body = json.dumps(
+            {
+                "mcpVersion": "2024-01-01",
+                "capabilities": ["sse"],
+                "sse": {
+                    "url": "https://psm.greennuri.info/sse",
+                    "message_url": "https://psm.greennuri.info/messages",
+                },
+            }
+        )
+        # 🔥 핵심: content-length 직접 지정 + charset 지정 + no chunk
+        return Response(
+            content=body.encode("utf-8"),
+            media_type="application/json; charset=utf-8",
+            headers={
+                "Content-Length": str(len(body.encode("utf-8"))),
+                "Connection": "close",
+            },
+        )
+
     async def handle_sse(request: Request) -> Response:
         try:
             logger.info("🔗 [SSE] New connection request received")
@@ -214,6 +236,8 @@ def create_starlette_app(mcp_server: Server, *, debug: bool = False) -> Starlett
     return Starlette(
         debug=debug,
         routes=[
+            Route("/.well-known/mcp", endpoint=well_known_mcp),
+            Route("/sse", endpoint=handle_sse),
             Route("/sse/", endpoint=handle_sse),
             Route("/tools", endpoint=list_tools),
             Mount("/messages/", app=sse.handle_post_message),
