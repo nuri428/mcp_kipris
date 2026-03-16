@@ -3,8 +3,9 @@
   "checkpoint_id": "6713b7ce98de",
   "strategy": "manual-commit",
   "branch": "main",
-  "checkpoints_count": 1,
+  "checkpoints_count": 2,
   "files_touched": [
+    "docs/04-report/foreign.report.md",
     "docs/archive/2026-03/_INDEX.md",
     "docs/archive/2026-03/kipris-claude-skill/kipris-claude-skill.report.md"
   ],
@@ -14,13 +15,19 @@
       "transcript": "/67/13b7ce98de/0/full.jsonl",
       "content_hash": "/67/13b7ce98de/0/content_hash.txt",
       "prompt": "/67/13b7ce98de/0/prompt.txt"
+    },
+    {
+      "metadata": "/67/13b7ce98de/1/metadata.json",
+      "transcript": "/67/13b7ce98de/1/full.jsonl",
+      "content_hash": "/67/13b7ce98de/1/content_hash.txt",
+      "prompt": "/67/13b7ce98de/1/prompt.txt"
     }
   ],
   "token_usage": {
-    "input_tokens": 55,
-    "cache_creation_tokens": 120792,
-    "cache_read_tokens": 3699504,
-    "output_tokens": 20417,
-    "api_call_count": 45
+    "input_tokens": 190,
+    "cache_creation_tokens": 476681,
+    "cache_read_tokens": 14695162,
+    "output_tokens": 70824,
+    "api_call_count": 164
   }
 }
