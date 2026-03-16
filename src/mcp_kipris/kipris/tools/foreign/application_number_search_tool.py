@@ -95,7 +95,7 @@ class ForeignPatentApplicationNumberSearchTool(ToolHandler):
                 return [TextContent(type="text", text="there is no result")]
 
             summary_df = response[
-                ["ApplicationNumber", "ApplicationDate", "InventionName", "RegistrationStatus"]
+                ["applicationNo", "applicationDate", "inventionName", "applicant"]
             ].copy()
             return [TextContent(type="text", text=summary_df.to_markdown(index=False))]
 
@@ -123,7 +123,7 @@ class ForeignPatentApplicationNumberSearchTool(ToolHandler):
                 return [TextContent(type="text", text="there is no result")]
 
             summary_df = response[
-                ["ApplicationNumber", "ApplicationDate", "InventionName", "RegistrationStatus"]
+                ["applicationNo", "applicationDate", "inventionName", "applicant"]
             ].copy()
             return [TextContent(type="text", text=summary_df.to_markdown(index=False))]
 

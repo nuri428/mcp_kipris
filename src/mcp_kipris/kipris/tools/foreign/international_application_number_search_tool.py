@@ -97,7 +97,7 @@ class ForeignPatentInternationalApplicationNumberSearchTool(ToolHandler):
                 return [TextContent(type="text", text="검색 결과가 없습니다.")]
 
             summary_df = response[
-                ["ApplicationNumber", "ApplicationDate", "InventionName", "RegistrationStatus"]
+                ["applicationNo", "applicationDate", "inventionName", "applicant"]
             ].copy()
             return [TextContent(type="text", text=summary_df.to_markdown(index=False))]
         except ValidationError as e:
@@ -133,7 +133,7 @@ class ForeignPatentInternationalApplicationNumberSearchTool(ToolHandler):
                 return [TextContent(type="text", text="검색 결과가 없습니다.")]
 
             summary_df = response[
-                ["ApplicationNumber", "ApplicationDate", "InventionName", "RegistrationStatus"]
+                ["applicationNo", "applicationDate", "inventionName", "applicant"]
             ].copy()
             return [TextContent(type="text", text=summary_df.to_markdown(index=False))]
         except ValidationError as e:

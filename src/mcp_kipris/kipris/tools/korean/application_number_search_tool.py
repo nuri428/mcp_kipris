@@ -76,9 +76,6 @@ class PatentApplicationNumberSearchTool(ToolHandler):
                 application_number=validated_args.application_number,
                 docs_count=validated_args.docs_count,
                 docs_start=validated_args.docs_start,
-                lastvalue=validated_args.lastvalue,
-                patent=validated_args.patent,
-                utility=validated_args.utility,
                 sort_spec=validated_args.sort_spec,
                 desc_sort=validated_args.desc_sort,
             )
@@ -105,9 +102,6 @@ class PatentApplicationNumberSearchTool(ToolHandler):
                 application_number=validated_args.application_number,
                 docs_count=validated_args.docs_count,
                 docs_start=validated_args.docs_start,
-                lastvalue=validated_args.lastvalue,
-                patent=validated_args.patent,
-                utility=validated_args.utility,
                 sort_spec=validated_args.sort_spec,
                 desc_sort=validated_args.desc_sort,
             )

@@ -26,7 +26,7 @@ from mcp_kipris.kipris.tools import (
     KoreanPatentSummarySearchTool,
 )
 
-load_dotenv()
+load_dotenv(override=True)
 
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger("mcp-kipris")

@@ -74,13 +74,17 @@ class ForeignPatentFreeSearchTool(ToolHandler):
                         "default": "US",
                     },
                 },
-                "required": ["search_word"],
+                "required": ["word"],
             },
             metadata={
-                "usage_hint": "권리자 이름으로 한국 특허를 검색하고 요약 정보를 제공합니다.",
-                "example_user_queries": ["삼성전자가 권리자인 특허 보여줘", "LG화학이 권리자인 특허 5건 알려줘"],
+                "usage_hint": "키워드로 외국 특허(미국, 유럽, 일본, 중국 등)를 검색하고 정보를 제공합니다.",
+                "example_user_queries": [
+                    "미국 배터리 특허 검색해줘",
+                    "유럽 반도체 특허 최신 10건 알려줘",
+                    "일본 이차전지 특허 조회",
+                ],
                 "preferred_response_style": (
-                    "권리자, 출원일자, 발명의 명칭, 출원번호를 포함하여 최근 순으로 표 형태로 정리해주세요. "
+                    "출원번호, 출원일자, 발명명칭, 출원인을 포함하여 최근 순으로 표 형태로 정리해주세요. "
                     "간결하고 이해하기 쉽게 응답해 주세요."
                 ),
             },
@@ -89,10 +93,10 @@ class ForeignPatentFreeSearchTool(ToolHandler):
     def run_tool(self, args: dict) -> List[TextContent]:
         try:
             validated_args = ForeignPatentFreeSearchArgs(**args)
-            logger.info(f"Searching for word: {validated_args.search_word}")
+            logger.info(f"Searching for word: {validated_args.word}")
 
             response = self.api.sync_search(
-                word=validated_args.search_word,
+                word=validated_args.word,
                 current_page=validated_args.current_page,
                 sort_field=validated_args.sort_field,
                 sort_state=validated_args.sort_state,
@@ -103,7 +107,7 @@ class ForeignPatentFreeSearchTool(ToolHandler):
                 return [TextContent(type="text", text="there is no result")]
 
             summary_df = response[
-                ["ApplicationNumber", "ApplicationDate", "InventionName", "RegistrationStatus"]
+                ["applicationNo", "applicationDate", "inventionName", "applicant"]
             ].copy()
             return [TextContent(type="text", text=summary_df.to_markdown(index=False))]
 
@@ -117,10 +121,10 @@ class ForeignPatentFreeSearchTool(ToolHandler):
     async def run_tool_async(self, args: dict) -> List[TextContent]:
         try:
             validated_args = ForeignPatentFreeSearchArgs(**args)
-            logger.info(f"Searching for word: {validated_args.search_word}")
+            logger.info(f"Searching for word: {validated_args.word}")
 
             response = await self.api.async_search(
-                word=validated_args.search_word,
+                word=validated_args.word,
                 current_page=validated_args.current_page,
                 sort_field=validated_args.sort_field,
                 sort_state=validated_args.sort_state,
@@ -131,7 +135,7 @@ class ForeignPatentFreeSearchTool(ToolHandler):
                 return [TextContent(type="text", text="there is no result")]
 
             summary_df = response[
-                ["ApplicationNumber", "ApplicationDate", "InventionName", "RegistrationStatus"]
+                ["applicationNo", "applicationDate", "inventionName", "applicant"]
             ].copy()
             return [TextContent(type="text", text=summary_df.to_markdown(index=False))]
 

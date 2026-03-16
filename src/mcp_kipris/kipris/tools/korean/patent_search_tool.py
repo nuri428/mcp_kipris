@@ -52,13 +52,13 @@ class PatentSearchTool(ToolHandler):
         validated_args = PatentSearchArgs(**args)
         logger.info(f"application_number: {validated_args.application_number}")
 
-        response = self.api.search(application_number=validated_args.application_number)
+        response = self.api.sync_search(word="", application_number=validated_args.application_number)
 
         # 검색 결과가 없는 경우 처리
         if response.empty:
             return [TextContent(type="text", text="검색 결과가 없습니다.")]
 
-        summary_df = response[["ApplicationNumber", "ApplicationDate", "InventionName", "RegistrationStatus"]].copy()
+        summary_df = response[["applicationNumber", "applicationDate", "inventionTitle", "applicantName", "registerStatus"]].copy()
         return [TextContent(type="text", text=summary_df.to_markdown(index=False))]
 
     async def run_tool_async(self, args: dict) -> Sequence[TextContent | ImageContent | EmbeddedResource]:
@@ -66,12 +66,11 @@ class PatentSearchTool(ToolHandler):
         validated_args = PatentSearchArgs(**args)
         logger.info(f"application_number: {validated_args.application_number}")
 
-        # 기존 API 클래스를 asyncio.to_thread로 비동기적으로 호출
-        response = await asyncio.to_thread(self.api.search, application_number=validated_args.application_number)
+        response = await self.api.async_search(word="", application_number=validated_args.application_number)
 
         # 검색 결과가 없는 경우 처리
         if response.empty:
             return [TextContent(type="text", text="검색 결과가 없습니다.")]
 
-        summary_df = response[["ApplicationNumber", "ApplicationDate", "InventionName", "RegistrationStatus"]].copy()
+        summary_df = response[["applicationNumber", "applicationDate", "inventionTitle", "applicantName", "registerStatus"]].copy()
         return [TextContent(type="text", text=summary_df.to_markdown(index=False))]

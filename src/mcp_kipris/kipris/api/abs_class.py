@@ -15,7 +15,7 @@ logging.basicConfig(
     handlers=[logging.StreamHandler()],
 )
 logger = logging.getLogger("mcp-kipris")
-load_dotenv()
+load_dotenv(override=True)
 
 
 # ic.disable()

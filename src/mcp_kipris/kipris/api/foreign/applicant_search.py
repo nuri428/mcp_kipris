@@ -51,7 +51,7 @@ class ForeignPatentApplicantSearchAPI(ABSKiprisAPI):
             collection_values=str(collection_values),
         )
         df = self.parse_response(response)
-        return df[["ApplicationNumber", "ApplicationDate", "InventionName", "RegistrationStatus"]]
+        return df[["applicationNo", "applicationDate", "inventionName", "applicant"]]
 
     def sync_search(
         self,
@@ -88,4 +88,4 @@ class ForeignPatentApplicantSearchAPI(ABSKiprisAPI):
             collection_values=str(collection_values),
         )
         df = self.parse_response(response)
-        return df[["ApplicationNumber", "ApplicationDate", "InventionName", "RegistrationStatus"]]
+        return df[["applicationNo", "applicationDate", "inventionName", "applicant"]]
