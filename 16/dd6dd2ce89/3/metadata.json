@@ -1,0 +1,43 @@
+{
+  "cli_version": "0.5.0",
+  "checkpoint_id": "16dd6dd2ce89",
+  "session_id": "f32a47e5-ba4a-4863-b373-b83b606b0ee4",
+  "strategy": "manual-commit",
+  "created_at": "2026-03-16T05:40:13.562671555Z",
+  "branch": "main",
+  "checkpoints_count": 2,
+  "files_touched": [
+    "src/mcp_kipris/kipris/api/abs_class.py",
+    "src/mcp_kipris/kipris/api/foreign/applicant_search.py",
+    "src/mcp_kipris/kipris/tools/foreign/application_number_search_tool.py",
+    "src/mcp_kipris/kipris/tools/foreign/free_search_tool.py",
+    "src/mcp_kipris/kipris/tools/foreign/international_application_number_search_tool.py",
+    "src/mcp_kipris/kipris/tools/foreign/international_open_number_search_tool.py",
+    "src/mcp_kipris/kipris/tools/korean/application_number_search_tool.py",
+    "src/mcp_kipris/kipris/tools/korean/patent_search_tool.py",
+    "src/mcp_kipris/server.py",
+    "uv.lock"
+  ],
+  "agent": "Claude Code",
+  "model": "claude-sonnet-4-6",
+  "turn_id": "f0e4d9ad7fda",
+  "token_usage": {
+    "input_tokens": 120,
+    "cache_creation_tokens": 344832,
+    "cache_read_tokens": 9402424,
+    "output_tokens": 47090,
+    "api_call_count": 108
+  },
+  "session_metrics": {
+    "turn_count": 2
+  },
+  "initial_attribution": {
+    "calculated_at": "2026-03-16T05:40:13.116402932Z",
+    "agent_lines": 27,
+    "human_added": 315,
+    "human_modified": 2,
+    "human_removed": 0,
+    "total_committed": 344,
+    "agent_percentage": 7.848837209302325
+  }
+}

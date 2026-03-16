@@ -3,11 +3,19 @@
   "checkpoint_id": "16dd6dd2ce89",
   "strategy": "manual-commit",
   "branch": "main",
-  "checkpoints_count": 7,
+  "checkpoints_count": 9,
   "files_touched": [
     ".env.example",
     "CLAUDE.md",
+    "src/mcp_kipris/kipris/api/abs_class.py",
+    "src/mcp_kipris/kipris/api/foreign/applicant_search.py",
+    "src/mcp_kipris/kipris/tools/foreign/application_number_search_tool.py",
     "src/mcp_kipris/kipris/tools/foreign/free_search_tool.py",
+    "src/mcp_kipris/kipris/tools/foreign/international_application_number_search_tool.py",
+    "src/mcp_kipris/kipris/tools/foreign/international_open_number_search_tool.py",
+    "src/mcp_kipris/kipris/tools/korean/application_number_search_tool.py",
+    "src/mcp_kipris/kipris/tools/korean/patent_search_tool.py",
+    "src/mcp_kipris/server.py",
     "uv.lock"
   ],
   "sessions": [
@@ -28,13 +36,19 @@
       "transcript": "/16/dd6dd2ce89/2/full.jsonl",
       "content_hash": "/16/dd6dd2ce89/2/content_hash.txt",
       "prompt": "/16/dd6dd2ce89/2/prompt.txt"
+    },
+    {
+      "metadata": "/16/dd6dd2ce89/3/metadata.json",
+      "transcript": "/16/dd6dd2ce89/3/full.jsonl",
+      "content_hash": "/16/dd6dd2ce89/3/content_hash.txt",
+      "prompt": "/16/dd6dd2ce89/3/prompt.txt"
     }
   ],
   "token_usage": {
-    "input_tokens": 83,
-    "cache_creation_tokens": 231069,
-    "cache_read_tokens": 4467612,
-    "output_tokens": 28207,
-    "api_call_count": 65
+    "input_tokens": 203,
+    "cache_creation_tokens": 575901,
+    "cache_read_tokens": 13870036,
+    "output_tokens": 75297,
+    "api_call_count": 173
   }
 }
