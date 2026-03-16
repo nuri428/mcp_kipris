@@ -1,0 +1,26 @@
+{
+  "cli_version": "0.5.0",
+  "checkpoint_id": "16dd6dd2ce89",
+  "strategy": "manual-commit",
+  "branch": "main",
+  "checkpoints_count": 2,
+  "files_touched": [
+    "src/mcp_kipris/kipris/tools/foreign/free_search_tool.py",
+    "uv.lock"
+  ],
+  "sessions": [
+    {
+      "metadata": "/16/dd6dd2ce89/0/metadata.json",
+      "transcript": "/16/dd6dd2ce89/0/full.jsonl",
+      "content_hash": "/16/dd6dd2ce89/0/content_hash.txt",
+      "prompt": "/16/dd6dd2ce89/0/prompt.txt"
+    }
+  ],
+  "token_usage": {
+    "input_tokens": 18,
+    "cache_creation_tokens": 47959,
+    "cache_read_tokens": 451708,
+    "output_tokens": 5232,
+    "api_call_count": 12
+  }
+}
