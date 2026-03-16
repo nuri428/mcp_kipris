@@ -1,0 +1,26 @@
+{
+  "cli_version": "0.5.0",
+  "checkpoint_id": "6713b7ce98de",
+  "strategy": "manual-commit",
+  "branch": "main",
+  "checkpoints_count": 1,
+  "files_touched": [
+    "docs/archive/2026-03/_INDEX.md",
+    "docs/archive/2026-03/kipris-claude-skill/kipris-claude-skill.report.md"
+  ],
+  "sessions": [
+    {
+      "metadata": "/67/13b7ce98de/0/metadata.json",
+      "transcript": "/67/13b7ce98de/0/full.jsonl",
+      "content_hash": "/67/13b7ce98de/0/content_hash.txt",
+      "prompt": "/67/13b7ce98de/0/prompt.txt"
+    }
+  ],
+  "token_usage": {
+    "input_tokens": 55,
+    "cache_creation_tokens": 120792,
+    "cache_read_tokens": 3699504,
+    "output_tokens": 20417,
+    "api_call_count": 45
+  }
+}
