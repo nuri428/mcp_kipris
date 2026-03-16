@@ -1,0 +1,167 @@
+{
+  "version": "2.0",
+  "lastUpdated": "2026-03-16T05:48:44.068487Z",
+  "activeFeatures": [
+    "korean",
+    "api",
+    "mcp_kipris"
+  ],
+  "primaryFeature": "korean",
+  "features": {
+    "foreign": {
+      "phase": "archived",
+      "matchRate": 100,
+      "iterationCount": 0,
+      "startedAt": "2026-03-16T04:54:32.116Z",
+      "archivedAt": "2026-03-16T05:48:44.068487Z",
+      "archivedTo": "docs/archive/2026-03/foreign/"
+    },
+    "korean": {
+      "phase": "do",
+      "phaseNumber": 3,
+      "matchRate": null,
+      "iterationCount": 0,
+      "requirements": [],
+      "documents": {},
+      "timestamps": {
+        "started": "2026-03-16T05:12:15.371Z",
+        "lastUpdated": "2026-03-16T05:13:44.621Z"
+      },
+      "lastFile": "/data/dev/git/mcp_kipris/src/mcp_kipris/kipris/tools/korean/patent_search_tool.py"
+    },
+    "api": {
+      "phase": "do",
+      "phaseNumber": 3,
+      "matchRate": null,
+      "iterationCount": 0,
+      "requirements": [],
+      "documents": {},
+      "timestamps": {
+        "started": "2026-03-16T05:33:40.944Z",
+        "lastUpdated": "2026-03-16T05:33:40.944Z"
+      },
+      "lastFile": "/data/dev/git/mcp_kipris/src/mcp_kipris/kipris/api/abs_class.py"
+    },
+    "mcp_kipris": {
+      "phase": "do",
+      "phaseNumber": 3,
+      "matchRate": null,
+      "iterationCount": 0,
+      "requirements": [],
+      "documents": {},
+      "timestamps": {
+        "started": "2026-03-16T05:33:44.680Z",
+        "lastUpdated": "2026-03-16T05:33:44.680Z"
+      },
+      "lastFile": "/data/dev/git/mcp_kipris/src/mcp_kipris/server.py"
+    }
+  },
+  "pipeline": {
+    "currentPhase": 1,
+    "level": "Dynamic",
+    "phaseHistory": []
+  },
+  "session": {
+    "startedAt": "2026-03-16T04:47:43.477Z",
+    "onboardingCompleted": false,
+    "lastActivity": "2026-03-16T05:33:44.680Z"
+  },
+  "history": [
+    {
+      "timestamp": "2026-03-16T04:54:32.116Z",
+      "feature": "foreign",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-16T04:54:35.643Z",
+      "feature": "foreign",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-16T04:54:39.228Z",
+      "feature": "foreign",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-16T04:54:43.620Z",
+      "feature": "foreign",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-16T04:56:26.743Z",
+      "feature": "foreign",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-16T04:59:20.822Z",
+      "feature": "foreign",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-16T05:12:15.371Z",
+      "feature": "korean",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-16T05:12:28.455Z",
+      "feature": "korean",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-16T05:13:00.692Z",
+      "feature": "korean",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-16T05:13:05.064Z",
+      "feature": "korean",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-16T05:13:10.251Z",
+      "feature": "korean",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-16T05:13:14.301Z",
+      "feature": "korean",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-16T05:13:44.621Z",
+      "feature": "korean",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-16T05:18:03.598Z",
+      "feature": "foreign",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-16T05:33:40.944Z",
+      "feature": "api",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-03-16T05:33:44.680Z",
+      "feature": "mcp_kipris",
+      "phase": "do",
+      "action": "updated"
+    }
+  ]
+}
