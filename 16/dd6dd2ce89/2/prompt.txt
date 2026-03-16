@@ -1,0 +1,13 @@
+이 프로젝트는 kipris api를 조회하는 부분을 mcp로 랩핑한 프로젝트야 난 이걸 좀더 발전 시켜서 claude skill로 작성해서 claudecode 및 claudework에서도 연동 가능하게 만들고 싶어 필요한 플랜을 작성하고 개발을 진행하고 테스트해서 완료해줘
+
+---
+
+/pdca analyze
+
+---
+
+/pdca report
+
+---
+
+/pdca archive kipris-claude-skill

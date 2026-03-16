@@ -1,0 +1,36 @@
+{
+  "cli_version": "0.5.0",
+  "checkpoint_id": "16dd6dd2ce89",
+  "session_id": "ecd59802-7604-47ed-8096-31711a8ef6f7",
+  "strategy": "manual-commit",
+  "created_at": "2026-03-16T05:40:09.977128114Z",
+  "branch": "main",
+  "checkpoints_count": 4,
+  "files_touched": [
+    ".env.example",
+    "src/mcp_kipris/kipris/tools/foreign/free_search_tool.py",
+    "uv.lock"
+  ],
+  "agent": "Claude Code",
+  "model": "claude-sonnet-4-6",
+  "turn_id": "a3ae39d7c46b",
+  "token_usage": {
+    "input_tokens": 55,
+    "cache_creation_tokens": 120792,
+    "cache_read_tokens": 3699504,
+    "output_tokens": 20417,
+    "api_call_count": 45
+  },
+  "session_metrics": {
+    "turn_count": 4
+  },
+  "initial_attribution": {
+    "calculated_at": "2026-03-16T05:40:09.567246206Z",
+    "agent_lines": 9,
+    "human_added": 317,
+    "human_modified": 10,
+    "human_removed": 0,
+    "total_committed": 336,
+    "agent_percentage": 2.6785714285714284
+  }
+}

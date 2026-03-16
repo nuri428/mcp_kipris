@@ -3,8 +3,9 @@
   "checkpoint_id": "16dd6dd2ce89",
   "strategy": "manual-commit",
   "branch": "main",
-  "checkpoints_count": 3,
+  "checkpoints_count": 7,
   "files_touched": [
+    ".env.example",
     "CLAUDE.md",
     "src/mcp_kipris/kipris/tools/foreign/free_search_tool.py",
     "uv.lock"
@@ -21,13 +22,19 @@
       "transcript": "/16/dd6dd2ce89/1/full.jsonl",
       "content_hash": "/16/dd6dd2ce89/1/content_hash.txt",
       "prompt": "/16/dd6dd2ce89/1/prompt.txt"
+    },
+    {
+      "metadata": "/16/dd6dd2ce89/2/metadata.json",
+      "transcript": "/16/dd6dd2ce89/2/full.jsonl",
+      "content_hash": "/16/dd6dd2ce89/2/content_hash.txt",
+      "prompt": "/16/dd6dd2ce89/2/prompt.txt"
     }
   ],
   "token_usage": {
-    "input_tokens": 28,
-    "cache_creation_tokens": 110277,
-    "cache_read_tokens": 768108,
-    "output_tokens": 7790,
-    "api_call_count": 20
+    "input_tokens": 83,
+    "cache_creation_tokens": 231069,
+    "cache_read_tokens": 4467612,
+    "output_tokens": 28207,
+    "api_call_count": 65
   }
 }
