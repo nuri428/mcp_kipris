@@ -93,7 +93,7 @@ class IpcSearchTool(ToolHandler):
             if response.empty:
                 return [TextContent(type="text", text="there is no result")]
 
-            summary_df = response[["ApplicationNumber", "ApplicationDate", "InventionName", "Applicant"]].copy()
+            summary_df = response[["applicationNumber", "applicationDate", "inventionTitle", "applicantName"]].copy()
             return [TextContent(type="text", text=summary_df.to_markdown(index=False))]
 
         except ValidationError as e:
@@ -122,7 +122,7 @@ class IpcSearchTool(ToolHandler):
             if response.empty:
                 return [TextContent(type="text", text="there is no result")]
 
-            summary_df = response[["ApplicationNumber", "ApplicationDate", "InventionName", "Applicant"]].copy()
+            summary_df = response[["applicationNumber", "applicationDate", "inventionTitle", "applicantName"]].copy()
             return [TextContent(type="text", text=summary_df.to_markdown(index=False))]
 
         except ValidationError as e:

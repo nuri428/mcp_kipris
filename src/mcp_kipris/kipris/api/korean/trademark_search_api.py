@@ -13,7 +13,7 @@ logger = getLogger("mcp-kipris")
 class TrademarkSearchAPI(ABSKiprisAPI):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        self.api_url = "http://plus.kipris.or.kr/kipo-api/kipi/trademarkInfoSearchService/trademarkInfoSearch"
+        self.api_url = "http://plus.kipris.or.kr/kipo-api/kipi/trademarkInfoSearchService/getWordSearch"
         self.KEY_STRING = "response.body.items.item"
 
     def sync_search(
@@ -46,7 +46,7 @@ class TrademarkSearchAPI(ABSKiprisAPI):
         response = self.sync_call(
             api_url=self.api_url,
             api_key_field="ServiceKey",
-            word=word,
+            search_string=word,
             page_no=str(page_no),
             num_of_rows=str(num_of_rows),
             desc_sort="true" if desc_sort else "false",
@@ -85,7 +85,7 @@ class TrademarkSearchAPI(ABSKiprisAPI):
         response = await self.async_call(
             api_url=self.api_url,
             api_key_field="ServiceKey",
-            word=word,
+            search_string=word,
             page_no=str(page_no),
             num_of_rows=str(num_of_rows),
             desc_sort="true" if desc_sort else "false",
