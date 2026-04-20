@@ -24,6 +24,10 @@ from mcp_kipris.kipris.tools import (
     KoreanPatentRighterSearchTool,
     KoreanPatentSearchTool,
     KoreanPatentSummarySearchTool,
+    KoreanAbstractSearchTool,
+    KoreanIpcSearchTool,
+    KoreanAgentSearchTool,
+    KoreanTrademarkSearchTool,
 )
 
 load_dotenv(override=True)
@@ -63,6 +67,10 @@ add_tool_handler(KoreanPatentRighterSearchTool())
 add_tool_handler(KoreanPatentApplicationNumberSearchTool())
 add_tool_handler(KoreanPatentSummarySearchTool())
 add_tool_handler(KoreanPatentDetailSearchTool())
+add_tool_handler(KoreanAbstractSearchTool())
+add_tool_handler(KoreanIpcSearchTool())
+add_tool_handler(KoreanAgentSearchTool())
+add_tool_handler(KoreanTrademarkSearchTool())
 add_tool_handler(ForeignPatentApplicantSearchTool())
 add_tool_handler(ForeignPatentApplicationNumberSearchTool())
 add_tool_handler(ForeignPatentFreeSearchTool())
