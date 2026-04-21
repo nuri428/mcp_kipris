@@ -10,6 +10,20 @@ from mcp_kipris.kipris.api.utils import get_nested_key_value
 logger = getLogger("mcp-kipris")
 
 
+def _select_columns(df: pd.DataFrame, expected_cols: list[str]) -> pd.DataFrame:
+    """Safely select available columns, avoiding KeyError on unexpected schema."""
+    if df.empty:
+        return df
+    available = [c for c in expected_cols if c in df.columns]
+    if not available:
+        logger.warning(f"Unexpected columns in response: {list(df.columns)}")
+        return df
+    return df[available]
+
+
+FOREIGN_APPLICANT_COLS = ["applicationNo", "applicationDate", "inventionName", "applicant"]
+
+
 class ForeignPatentApplicantSearchAPI(ABSKiprisAPI):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -24,7 +38,7 @@ class ForeignPatentApplicantSearchAPI(ABSKiprisAPI):
         sort_state: bool = True,
         collection_values: str = "US",
     ) -> pd.DataFrame:
-        """_summary_
+        """해외 특허 출원인 검색
 
         Args:
             applicant (str): 출원인 이름
@@ -37,7 +51,7 @@ class ForeignPatentApplicantSearchAPI(ABSKiprisAPI):
                 ※다중 국가 선택 불가
 
         Returns:
-            pd.DataFrame: _description_
+            pd.DataFrame: 검색 결과
         """
         logger.info(f"applicant: {applicant}")
 
@@ -51,7 +65,7 @@ class ForeignPatentApplicantSearchAPI(ABSKiprisAPI):
             collection_values=str(collection_values),
         )
         df = self.parse_response(response)
-        return df[["applicationNo", "applicationDate", "inventionName", "applicant"]]
+        return _select_columns(df, FOREIGN_APPLICANT_COLS)
 
     def sync_search(
         self,
@@ -61,7 +75,7 @@ class ForeignPatentApplicantSearchAPI(ABSKiprisAPI):
         sort_state: bool = True,
         collection_values: str = "US",
     ) -> pd.DataFrame:
-        """_summary_
+        """해외 특허 출원인 검색 (동기)
 
         Args:
             applicant (str): 출원인 이름
@@ -74,7 +88,7 @@ class ForeignPatentApplicantSearchAPI(ABSKiprisAPI):
                 ※다중 국가 선택 불가
 
         Returns:
-            pd.DataFrame: _description_
+            pd.DataFrame: 검색 결과
         """
         logger.info(f"applicant: {applicant}")
 
@@ -88,4 +102,4 @@ class ForeignPatentApplicantSearchAPI(ABSKiprisAPI):
             collection_values=str(collection_values),
         )
         df = self.parse_response(response)
-        return df[["applicationNo", "applicationDate", "inventionName", "applicant"]]
+        return _select_columns(df, FOREIGN_APPLICANT_COLS)

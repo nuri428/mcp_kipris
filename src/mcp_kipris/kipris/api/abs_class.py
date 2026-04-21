@@ -79,7 +79,36 @@ class ABSKiprisAPI:
             logger.error(f"[async] KIPRIS 요청 실패: {e}")
             raise
 
+    def check_api_error(self, response: dict) -> t.Optional[str]:
+        """Check KIPRIS API response for error codes.
+
+        Returns:
+            Error message string if error found, None otherwise.
+        """
+        if response is None:
+            return "Empty response from KIPRIS API"
+        result_code = get_nested_key_value(response, "response.header.resultCode")
+        if result_code and result_code != "00":
+            result_msg = get_nested_key_value(response, "response.header.resultMsg") or "Unknown error"
+            error_map = {
+                "00": "NORMAL SERVICE",
+                "10": "INVALID_REQUEST_PARAMETER_ERROR",
+                "20": "NO_RESULTS",
+                "30": "ACCESS_KEY_NOT_REGISTERED",
+                "31": "DEADLINE_EXPIRED",
+            }
+            code_desc = error_map.get(str(result_code), f"CODE_{result_code}")
+            logger.warning(f"KIPRIS API 에러: [{result_code}] {result_msg} ({code_desc})")
+            return f"[{result_code}] {result_msg}"
+        return None
+
     def parse_response(self, response: dict) -> pd.DataFrame:
+        # Check for API-level errors first
+        api_error = self.check_api_error(response)
+        if api_error:
+            logger.warning(f"KIPRIS API 에러로 인해 빈 결과 반환: {api_error}")
+            return pd.DataFrame()
+
         res_dict = get_nested_key_value(response, self.KEY_STRING)
         if res_dict is None:
             logger.info("patents is None")
