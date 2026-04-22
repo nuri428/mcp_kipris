@@ -135,6 +135,3 @@ if __name__ == "__main__":
     import asyncio
 
     asyncio.run(main())
-
-from mcp_kipris.kipris.tools import KoreanTrademarkSearchTool
-add_tool_handler(KoreanTrademarkSearchTool())
