@@ -44,6 +44,6 @@ __all__ = [
     "ForeignPatentFreeSearchTool",
     "ForeignPatentInternationalApplicationNumberSearchTool",
     "ForeignPatentInternationalOpenNumberSearchTool",
-, "KoreanIpcSearchTool"]
+, "KoreanAgentSearchTool"]
 
-from mcp_kipris.kipris.tools.korean.ipc_search_tool import IpcSearchTool as KoreanIpcSearchTool
+from mcp_kipris.kipris.tools.korean.agent_search_tool import AgentSearchTool as KoreanAgentSearchTool
