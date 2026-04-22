@@ -136,5 +136,5 @@ if __name__ == "__main__":
 
     asyncio.run(main())
 
-from mcp_kipris.kipris.tools import KoreanAbstractSearchTool
-add_tool_handler(KoreanAbstractSearchTool())
+from mcp_kipris.kipris.tools import KoreanIpcSearchTool
+add_tool_handler(KoreanIpcSearchTool())
