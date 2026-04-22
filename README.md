@@ -213,3 +213,9 @@ MIT License
 3. Commit your Changes (`git commit -m 'Add some AmazingFeature'`)
 4. Push to the Branch (`git push origin feature/AmazingFeature`)
 5. Open a Pull Request
+
+## 감사의 말씀
+
+[@haseo-ai](https://github.com/haseo-ai) 님께서 초록 검색(abstract), IPC 코드 검색, 대리인 검색, 상표 검색 기능 추가 및 API 에러 핸들링 개선 등 총 5개의 PR을 기여해 주셨습니다. 덕분에 프로젝트가 한층 더 풍성해졌습니다. 진심으로 감사드립니다!
+
+그리고 PR을 받는 과정에서 git 브랜치 관리가 미숙하여 PR 순서가 뒤섞이고, 결국 같은 내용을 두 번 머지하는 실수를 저질렀습니다. 불필요한 혼란을 드려서 정말 죄송합니다. 앞으로는 더 꼼꼼하게 관리하겠습니다.
