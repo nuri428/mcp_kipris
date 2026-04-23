@@ -27,6 +27,28 @@ KIPRIS(한국특허정보원) API를 활용한 특허 검색 도구입니다.
 6. 특허 요약 정보 검색 (PatentSummarySearchTool)
    - 출원번호로 특허의 요약 정보 조회
 
+7. 초록 검색 (PatentAbstractSearchTool) - **[@haseo-ai](https://github.com/haseo-ai) 기여**
+   - 초록(발명의 개요)으로 특허 검색
+   - 특허/실용신안 필터링 지원
+   - 정렬 및 필터링 옵션 지원
+
+8. IPC 코드 검색 (PatentIPCSearchTool) - **[@haseo-ai](https://github.com/haseo-ai) 기여**
+   - IPC 코드로 특허 검색
+   - 특허/실용신안 필터링 지원
+   - 정렬 및 필터링 옵션 지원
+
+9. 대리인 검색 (PatentAgentSearchTool) - **[@haseo-ai](https://github.com/haseo-ai) 기여**
+   - 대리인명으로 특허 검색
+   - 특허/실용신안 필터링 지원
+   - 정렬 및 필터링 옵션 지원
+
+### 상표 검색
+
+1. 상표 검색 (TrademarkSearchTool) - **[@haseo-ai](https://github.com/haseo-ai) 기여**
+   - 키워드로 한국 상표 검색
+   - 상표명, 출원일자, 상표 상태, 출원인 정보 제공
+   - 정렬 및 필터링 옵션 지원
+
 ### 해외 특허 검색
 1. 출원인 검색 (ForeignPatentApplicantSearchTool)
    - 출원인 이름으로 해외 특허 검색
@@ -173,8 +195,14 @@ curl -X POST "http://localhost:6274/messages/?session_id=<세션_ID>" \
    - `patent_application_number_search`: 출원번호로 검색
    - `patent_summary_search`: 출원번호로 요약 정보 검색
    - `patent_detail_search`: 출원번호로 상세 정보 검색
+   - `abstract_search`: 초록(발명의 개요) 기준 검색
+   - `ipc_search`: IPC 코드 기준 검색
+   - `agent_search`: 대리인명 기준 검색
 
-2. 해외 특허 검색:
+2. 상표 검색:
+   - `trademark_search`: 상표 키워드 기준 검색
+
+3. 해외 특허 검색:
    - `foreign_patent_applicant_search`: 출원인 기준 검색
    - `foreign_patent_application_number_search`: 출원번호로 검색
    - `foreign_patent_free_search`: 자유 텍스트 검색
@@ -220,6 +248,18 @@ MIT License
 
 ## 감사의 말씀
 
-[@haseo-ai](https://github.com/haseo-ai) 님께서 초록 검색(abstract), IPC 코드 검색, 대리인 검색, 상표 검색 기능 추가 및 API 에러 핸들링 개선 등 총 5개의 PR을 기여해 주셨습니다. 덕분에 프로젝트가 한층 더 풍성해졌습니다. 진심으로 감사드립니다!
+이 프로젝트는 다음 분들의 소중한 기여로 더욱 발전했습니다:
 
-그리고 PR을 받는 과정에서 git 브랜치 관리가 미숙하여 PR 순서가 뒤섞이고, 결국 같은 내용을 두 번 머지하는 실수를 저질렀습니다. 불필요한 혼란을 드려서 정말 죄송합니다. 앞으로는 더 꼼꼼하게 관리하겠습니다.
+### [@haseo-ai](https://github.com/haseo-ai) 님의 기여
+다음과 같은 다양한 기능과 개선을 통해 프로젝트가 한층 더 풍성해졌습니다:
+
+- **초록 검색 기능** (PatentAbstractSearchTool): 발명의 개요로 특허 검색
+- **IPC 코드 검색 기능** (PatentIPCSearchTool): 국제특허분류 코드로 검색
+- **대리인 검색 기능** (PatentAgentSearchTool): 특허 대리인명으로 검색
+- **상표 검색 기능** (TrademarkSearchTool): 한국 상표 검색
+- **API 에러 핸들링 개선**: KIPRIS API 오류 처리 강화
+
+총 5개의 PR을 기여해 주셨으며, 덕분에 프로젝트가 한층 더 풍성해졌습니다. 진심으로 감사드립니다!
+
+### 사과의 말씀
+PR을 받는 과정에서 git 브랜치 관리가 미숙하여 PR 순서가 뒤섞이고, 결국 같은 내용을 두 번 머지하는 실수를 저질렀습니다. 불필요한 혼란을 드려서 정말 죄송합니다. 앞으로는 더 꼼꼼하게 관리하겠습니다.
