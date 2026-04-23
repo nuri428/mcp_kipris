@@ -1,5 +1,8 @@
 # MCP KIPRIS
 
+[![Test](https://github.com/nuri428/mcp_kipris/actions/workflows/test.yml/badge.svg)](https://github.com/nuri428/mcp_kipris/actions/workflows/test.yml)
+[![codecov](https://codecov.io/gh/nuri428/mcp_kipris/branch/main/graph/badge.svg)](https://codecov.io/gh/nuri428/mcp_kipris)
+
 KIPRIS(한국특허정보원) API를 활용한 특허 검색 도구입니다.
 
 ## 기능
@@ -240,11 +243,18 @@ MIT License
 
 ## 기여하기
 
+개발자 가이드와 CI/CD 설정 방법은 [DEVELOPMENT.md](DEVELOPMENT.md)를 참고해주세요.
+
 1. Fork the Project
 2. Create your Feature Branch (`git checkout -b feature/AmazingFeature`)
 3. Commit your Changes (`git commit -m 'Add some AmazingFeature'`)
 4. Push to the Branch (`git push origin feature/AmazingFeature`)
 5. Open a Pull Request
+
+### 개발자를 위한 팁
+- CI는 자동으로 코드 스타일, 포맷팅, 테스트를 검사합니다
+- PR 생성 전 로컬에서 `ruff check src/`, `ruff format src/`, `pytest test/`를 실행해보세요
+- KIPRIS API 키는 GitHub Secrets를 통해 안전하게 관리됩니다
 
 ## 감사의 말씀
 
