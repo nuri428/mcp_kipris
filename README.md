@@ -206,6 +206,10 @@ curl -X POST "http://localhost:6274/messages/?session_id=<세션_ID>" \
 
 MIT License
 
+
+## ClaudeWork에서는 스킬로 검색 가능합니다. 
+   [kipris_skill](https://github.com/nuri428/kipris_skill)
+
 ## 기여하기
 
 1. Fork the Project
