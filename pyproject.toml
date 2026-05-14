@@ -1,13 +1,37 @@
 [build-system]
-requires = ["setuptools>=65.5.1", "wheel"]
+requires = ["setuptools>=65.5.1", "setuptools-scm>=8.0", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
 name = "mcp-kipris"
 dynamic = ["version"]
-description = "Add your description here"
+description = "MCP server for KIPRIS — Korean Intellectual Property Rights Information Service (patent & trademark search)"
 readme = "README.md"
 requires-python = ">=3.11"
+license = { text = "MIT" }
+authors = [
+    { name = "강재호", email = "greennuri@gmail.com" },
+]
+keywords = [
+    "mcp",
+    "kipris",
+    "patent",
+    "trademark",
+    "korean-patent",
+    "intellectual-property",
+    "kipo",
+    "model-context-protocol",
+]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Scientific/Engineering :: Information Analysis",
+    "Topic :: Internet :: WWW/HTTP :: Indexing/Search",
+]
 dependencies = [
     "fastapi>=0.115.14",
     "icecream>=2.1.4",
@@ -16,8 +40,6 @@ dependencies = [
     "mcp[cli]>=1.6.0",
     "networkx>=3.4.2",
     "pandas>=2.2.3",
-    "pytest>=8.3.5",
-    "pytest-asyncio>=0.26.0",
     "python-dotenv>=1.1.0",
     "requests>=2.32.3",
     "scikit-learn>=1.6.1",
@@ -25,25 +47,30 @@ dependencies = [
     "tabulate>=0.9.0",
     "xmltodict>=0.14.2",
 ]
-scripts = { mcp-kipris = "mcp_kipris:main" }
+
+[project.scripts]
+mcp-kipris = "mcp_kipris:main"
+
+[project.urls]
+Homepage = "https://github.com/nuri428/mcp_kipris"
+Repository = "https://github.com/nuri428/mcp_kipris"
+"Bug Tracker" = "https://github.com/nuri428/mcp_kipris/issues"
+Changelog = "https://github.com/nuri428/mcp_kipris/releases"
 
 [dependency-groups]
 dev = [
+    "pytest>=8.3.5",
+    "pytest-asyncio>=0.26.0",
     "pyright>=1.1.398",
     "ruff>=0.3.0",
+    "build>=1.0.0",
 ]
 
 [tool.ruff]
-# 코드 포맷팅 관련 규칙
 line-length = 120
 indent-width = 4
-
-# 코드 뒤쪽 공백 제거
-extend-select = ["W291"]  # 줄 끝 공백 검사
-# fix = true  # 자동 수정 활성화
-
-# 사용하지 않는 import와 문법 오류 검사 비활성화
-ignore = ["F401", "E", "F"]  # F401: 사용하지 않는 import, E: 문법 오류, F: 문법 오류
+extend-select = ["W291"]
+ignore = ["F401", "E", "F"]
 
 [tool.ruff.format]
 quote-style = "double"
