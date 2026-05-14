@@ -45,7 +45,7 @@ KIPRIS(한국특허정보원) API를 활용한 특허 검색 도구입니다. AI
 ## 요구사항
 
 - Python 3.11 이상
-- [KIPRIS Open API 키](https://www.kipris.or.kr/khome/main.do) (무료 회원가입 필요)
+- [KIPRIS Open API 키](https://plus.kipris.or.kr) (무료 회원가입 필요)
 
 ---
 

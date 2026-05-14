@@ -48,7 +48,7 @@ Then add the server to Claude Desktop — see [Claude Desktop Configuration](#cl
 
 ## Getting a KIPRIS API Key
 
-1. Go to [https://www.kipris.or.kr](https://www.kipris.or.kr) *(site is in Korean — use a browser translator)*
+1. Go to [https://plus.kipris.or.kr](https://plus.kipris.or.kr) *(site is in Korean — use a browser translator)*
 2. Register for a free account
 3. Apply for an Open API key from the developer portal
 4. Your key is free for non-commercial use with a daily request quota
