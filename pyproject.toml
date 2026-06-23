@@ -61,6 +61,7 @@ Changelog = "https://github.com/nuri428/mcp_kipris/releases"
 dev = [
     "pytest>=8.3.5",
     "pytest-asyncio>=0.26.0",
+    "pytest-cov>=5.0.0",
     "pyright>=1.1.398",
     "ruff>=0.3.0",
     "build>=1.0.0",
