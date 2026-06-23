@@ -176,6 +176,9 @@ src/.DS_Store
 
 # Claude Code local settings (may contain API keys)
 .claude/settings.local.json
+
+# Smithery build artifact
+server.mcpb
 */.DS_Store
 **/.DS_Store
 **/**/.DS_Store
