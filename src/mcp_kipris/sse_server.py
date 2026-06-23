@@ -167,7 +167,7 @@ def create_starlette_app(mcp_server: Server, *, debug: bool = False) -> Starlett
                 },
             }
         )
-        # 🔥 핵심: content-length 직접 지정 + charset 지정 + no chunk
+        # content-length 직접 지정 + charset 지정 + no chunk
         return Response(
             content=body.encode("utf-8"),
             media_type="application/json; charset=utf-8",
@@ -175,6 +175,41 @@ def create_starlette_app(mcp_server: Server, *, debug: bool = False) -> Starlett
                 "Content-Length": str(len(body.encode("utf-8"))),
                 "Connection": "close",
             },
+        )
+
+    async def well_known_mcp_server_card(request):
+        tools = [tool.get_tool_description() for tool in tool_handlers.values()]
+        card = {
+            "serverInfo": {
+                "name": "mcp-kipris",
+                "version": "0.1.2",
+            },
+            "description": "KIPRIS(한국특허정보원) Open API를 통해 한국 및 외국 특허/상표를 검색하는 MCP 서버",
+            "tools": [
+                {
+                    "name": tool.name,
+                    "description": tool.description,
+                    "inputSchema": tool.inputSchema,
+                }
+                for tool in tools
+            ],
+            "authentication": {
+                "required": True,
+                "type": "env",
+                "envVars": [
+                    {
+                        "name": "KIPRIS_API_KEY",
+                        "description": "KIPRIS Open API 인증키 (https://plus.kipris.or.kr 에서 발급)",
+                        "required": True,
+                    }
+                ],
+            },
+        }
+        body = json.dumps(card, ensure_ascii=False)
+        return Response(
+            content=body.encode("utf-8"),
+            media_type="application/json; charset=utf-8",
+            headers={"Content-Length": str(len(body.encode("utf-8")))},
         )
 
     async def handle_sse(request: Request) -> Response:
@@ -237,6 +272,7 @@ def create_starlette_app(mcp_server: Server, *, debug: bool = False) -> Starlett
         debug=debug,
         routes=[
             Route("/.well-known/mcp", endpoint=well_known_mcp),
+            Route("/.well-known/mcp/server-card.json", endpoint=well_known_mcp_server_card),
             Route("/sse", endpoint=handle_sse),
             Route("/sse/", endpoint=handle_sse),
             Route("/tools", endpoint=list_tools),
