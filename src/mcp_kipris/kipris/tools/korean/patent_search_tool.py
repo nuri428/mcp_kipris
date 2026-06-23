@@ -58,7 +58,9 @@ class PatentSearchTool(ToolHandler):
         if response.empty:
             return [TextContent(type="text", text="검색 결과가 없습니다.")]
 
-        summary_df = response[["applicationNumber", "applicationDate", "inventionTitle", "applicantName", "registerStatus"]].copy()
+        summary_df = response[
+            ["applicationNumber", "applicationDate", "inventionTitle", "applicantName", "registerStatus"]
+        ].copy()
         return [TextContent(type="text", text=summary_df.to_markdown(index=False))]
 
     async def run_tool_async(self, args: dict) -> Sequence[TextContent | ImageContent | EmbeddedResource]:
@@ -72,5 +74,7 @@ class PatentSearchTool(ToolHandler):
         if response.empty:
             return [TextContent(type="text", text="검색 결과가 없습니다.")]
 
-        summary_df = response[["applicationNumber", "applicationDate", "inventionTitle", "applicantName", "registerStatus"]].copy()
+        summary_df = response[
+            ["applicationNumber", "applicationDate", "inventionTitle", "applicantName", "registerStatus"]
+        ].copy()
         return [TextContent(type="text", text=summary_df.to_markdown(index=False))]

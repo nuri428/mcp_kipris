@@ -23,7 +23,10 @@ class IpcSearchArgs(BaseModel):
     ipc_number: str = Field(..., description="IPC 코드")
     patent: bool = Field(True, description="특허 포함 여부 (기본값: true)")
     utility: bool = Field(True, description="실용신안 포함 여부 (기본값: true)")
-    lastvalue: str = Field("", description="특허 등록 상태 (A:공개, C:정정공개, F:공고, G:정정공고, I:무효공고, J:취소공고, R:재공고, 공백:전체)")
+    lastvalue: str = Field(
+        "",
+        description="특허 등록 상태 (A:공개, C:정정공개, F:공고, G:정정공고, I:무효공고, J:취소공고, R:재공고, 공백:전체)",
+    )
     docs_start: int = Field(1, description="검색 시작 위치 (기본값: 1)")
     docs_count: int = Field(10, description="검색 결과 수 (기본값: 10, 범위: 1-30)")
     desc_sort: bool = Field(True, description="내림차순 정렬 여부 (기본값: true)")

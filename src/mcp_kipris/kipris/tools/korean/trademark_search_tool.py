@@ -83,16 +83,16 @@ class TrademarkSearchTool(ToolHandler):
             # 상표 검색 결과의 컬럼이 특허와 다를 수 있으므로, 일반적인 컬럼만 선택
             available_columns = response.columns.tolist()
             summary_columns = []
-            
+
             # 일반적인 상표 정보 컬럼들
             for col in ["ApplicationNumber", "ApplicationDate", "TrademarkName", "Applicant"]:
                 if col in available_columns:
                     summary_columns.append(col)
-            
+
             # 만약 위 컬럼들이 없다면, 처음 4개 컬럼을 선택
             if not summary_columns:
                 summary_columns = available_columns[:4]
-            
+
             summary_df = response[summary_columns].copy()
             return [TextContent(type="text", text=summary_df.to_markdown(index=False))]
 
@@ -122,16 +122,16 @@ class TrademarkSearchTool(ToolHandler):
             # 상표 검색 결과의 컬럼이 특허와 다를 수 있으므로, 일반적인 컬럼만 선택
             available_columns = response.columns.tolist()
             summary_columns = []
-            
+
             # 일반적인 상표 정보 컬럼들
             for col in ["ApplicationNumber", "ApplicationDate", "TrademarkName", "Applicant"]:
                 if col in available_columns:
                     summary_columns.append(col)
-            
+
             # 만약 위 컬럼들이 없다면, 처음 4개 컬럼을 선택
             if not summary_columns:
                 summary_columns = available_columns[:4]
-            
+
             summary_df = response[summary_columns].copy()
             return [TextContent(type="text", text=summary_df.to_markdown(index=False))]
 

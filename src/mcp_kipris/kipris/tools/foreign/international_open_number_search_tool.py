@@ -94,9 +94,7 @@ class ForeignPatentInternationalOpenNumberSearchTool(ToolHandler):
             if response.empty:
                 return [TextContent(type="text", text="there is no result")]
 
-            summary_df = response[
-                ["applicationNo", "applicationDate", "inventionName", "applicant"]
-            ].copy()
+            summary_df = response[["applicationNo", "applicationDate", "inventionName", "applicant"]].copy()
             return [TextContent(type="text", text=summary_df.to_markdown(index=False))]
 
         except ValidationError as e:
@@ -135,9 +133,7 @@ class ForeignPatentInternationalOpenNumberSearchTool(ToolHandler):
             if response.empty:
                 return [TextContent(type="text", text="there is no result")]
 
-            summary_df = response[
-                ["applicationNo", "applicationDate", "inventionName", "applicant"]
-            ].copy()
+            summary_df = response[["applicationNo", "applicationDate", "inventionName", "applicant"]].copy()
             return [TextContent(type="text", text=summary_df.to_markdown(index=False))]
 
         except ValidationError as e:

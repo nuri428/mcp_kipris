@@ -69,6 +69,9 @@ dev = [
 [tool.ruff]
 line-length = 120
 indent-width = 4
+exclude = ["src/mcp_kipris/_version.py"]
+
+[tool.ruff.lint]
 extend-select = ["W291"]
 ignore = ["F401", "E", "F"]
 

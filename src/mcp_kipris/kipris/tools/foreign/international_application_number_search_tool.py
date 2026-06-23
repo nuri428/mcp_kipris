@@ -96,9 +96,7 @@ class ForeignPatentInternationalApplicationNumberSearchTool(ToolHandler):
             if response.empty:
                 return [TextContent(type="text", text="검색 결과가 없습니다.")]
 
-            summary_df = response[
-                ["applicationNo", "applicationDate", "inventionName", "applicant"]
-            ].copy()
+            summary_df = response[["applicationNo", "applicationDate", "inventionName", "applicant"]].copy()
             return [TextContent(type="text", text=summary_df.to_markdown(index=False))]
         except ValidationError as e:
             logger.error(f"Validation error: {str(e)}")
@@ -132,9 +130,7 @@ class ForeignPatentInternationalApplicationNumberSearchTool(ToolHandler):
             if response.empty:
                 return [TextContent(type="text", text="검색 결과가 없습니다.")]
 
-            summary_df = response[
-                ["applicationNo", "applicationDate", "inventionName", "applicant"]
-            ].copy()
+            summary_df = response[["applicationNo", "applicationDate", "inventionName", "applicant"]].copy()
             return [TextContent(type="text", text=summary_df.to_markdown(index=False))]
         except ValidationError as e:
             logger.error(f"Validation error: {str(e)}")

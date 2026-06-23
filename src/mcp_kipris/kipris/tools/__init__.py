@@ -43,4 +43,5 @@ __all__ = [
     "ForeignPatentApplicationNumberSearchTool",
     "ForeignPatentFreeSearchTool",
     "ForeignPatentInternationalApplicationNumberSearchTool",
-    "ForeignPatentInternationalOpenNumberSearchTool"]
+    "ForeignPatentInternationalOpenNumberSearchTool",
+]
