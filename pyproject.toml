@@ -83,5 +83,8 @@ line-ending = "auto"
 docstring-code-format = true
 docstring-code-line-length = 120
 
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+
 [tool.setuptools_scm]
 write_to = "src/mcp_kipris/_version.py"
