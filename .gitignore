@@ -173,6 +173,9 @@ cython_debug/
 # PyPI configuration file
 .pypirc
 src/.DS_Store
+
+# Claude Code local settings (may contain API keys)
+.claude/settings.local.json
 */.DS_Store
 **/.DS_Store
 **/**/.DS_Store

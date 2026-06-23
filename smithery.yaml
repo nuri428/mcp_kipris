@@ -1,0 +1,20 @@
+# Smithery configuration: https://smithery.ai/docs/config#smitheryyaml
+
+startCommand:
+  type: stdio
+  configSchema:
+    type: object
+    properties:
+      kiprisApiKey:
+        type: string
+        description: "KIPRIS Open API 인증키 (https://plus.kipris.or.kr 에서 발급)"
+    required:
+      - kiprisApiKey
+  commandFunction: |-
+    (config) => ({
+      command: "uvx",
+      args: ["mcp-kipris"],
+      env: {
+        "KIPRIS_API_KEY": config.kiprisApiKey
+      }
+    })
