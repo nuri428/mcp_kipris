@@ -1,5 +1,6 @@
 # MCP KIPRIS
 
+[![smithery badge](https://smithery.ai/badge/greennuri/mcp-kipris)](https://smithery.ai/servers/greennuri/mcp-kipris)
 [![Test](https://github.com/nuri428/mcp_kipris/actions/workflows/test.yml/badge.svg)](https://github.com/nuri428/mcp_kipris/actions/workflows/test.yml)
 [![codecov](https://codecov.io/gh/nuri428/mcp_kipris/branch/main/graph/badge.svg)](https://codecov.io/gh/nuri428/mcp_kipris)
 [![Python](https://img.shields.io/badge/python-3.11%20%7C%203.12-blue)](https://www.python.org)
@@ -91,13 +92,23 @@ Search patents from 13 countries via KIPRIS's international database:
 
 ## Installation
 
-### Option 1: From PyPI (recommended)
+### Option 1: Via Smithery (easiest — no local setup required)
+
+Install directly through the [Smithery marketplace](https://smithery.ai/servers/greennuri/mcp-kipris). Smithery handles the setup and prompts you for your KIPRIS API key:
+
+```bash
+npx @smithery/cli@latest mcp add greennuri/mcp-kipris
+```
+
+Or visit **[smithery.ai/servers/greennuri/mcp-kipris](https://smithery.ai/servers/greennuri/mcp-kipris)** and click **Install**.
+
+### Option 2: From PyPI
 
 ```bash
 pip install mcp-kipris
 ```
 
-### Option 2: From Source (development)
+### Option 3: From Source (development)
 
 ```bash
 git clone https://github.com/nuri428/mcp_kipris.git

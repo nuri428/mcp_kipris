@@ -1,5 +1,6 @@
 # MCP KIPRIS
 
+[![smithery badge](https://smithery.ai/badge/greennuri/mcp-kipris)](https://smithery.ai/servers/greennuri/mcp-kipris)
 [![Test](https://github.com/nuri428/mcp_kipris/actions/workflows/test.yml/badge.svg)](https://github.com/nuri428/mcp_kipris/actions/workflows/test.yml)
 [![codecov](https://codecov.io/gh/nuri428/mcp_kipris/branch/main/graph/badge.svg)](https://codecov.io/gh/nuri428/mcp_kipris)
 [![Python](https://img.shields.io/badge/python-3.11%20%7C%203.12-blue)](https://www.python.org)
@@ -51,15 +52,23 @@ KIPRIS(한국특허정보원) API를 활용한 특허 검색 도구입니다. AI
 
 ## 설치
 
-### 방법 1: PyPI에서 설치 (권장)
+### 방법 1: Smithery 마켓플레이스 (가장 간편 — 로컬 설치 불필요)
+
+[Smithery 마켓플레이스](https://smithery.ai/servers/greennuri/mcp-kipris)를 통해 바로 설치할 수 있습니다. KIPRIS API 키만 입력하면 자동으로 설정됩니다:
+
+```bash
+npx @smithery/cli@latest mcp add greennuri/mcp-kipris
+```
+
+또는 **[smithery.ai/servers/greennuri/mcp-kipris](https://smithery.ai/servers/greennuri/mcp-kipris)** 페이지에서 **Install** 버튼을 클릭하세요.
+
+### 방법 2: PyPI에서 설치
 
 ```bash
 pip install mcp-kipris
 ```
 
-> PyPI 배포 이후 사용 가능합니다. 배포 전이라면 방법 2(소스 설치)를 사용하세요.
-
-### 방법 2: 소스에서 설치 (개발용)
+### 방법 3: 소스에서 설치 (개발용)
 
 ```bash
 git clone https://github.com/nuri428/mcp_kipris.git
